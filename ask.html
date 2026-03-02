@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>StudentHub — Задать вопрос</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== ОБЩИЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== НАВИГАЦИЯ ===== */
+        nav {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .logo {
+            font-size: clamp(22px, 5vw, 26px);
+            font-weight: 800;
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: #8b5cf6;
+        }
+
+        .logo-icon {
+            font-size: clamp(24px, 6vw, 30px);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .btn {
+            padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 24px);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: clamp(14px, 3vw, 15px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 14px;
+        }
+
+        .btn-large {
+            padding: 14px 32px;
+            font-size: 18px;
+            border-radius: 50px;
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content {
+            flex: 1 0 auto;
+            padding-top: 90px;
+            padding-bottom: 40px;
+            width: 100%;
+        }
+
+        .ask-header {
+            margin-bottom: 30px;
+        }
+
+        .ask-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .ask-header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* ===== ФОРМА ===== */
+        .ask-form {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .form-label i {
+            color: #3b82f6;
+            font-size: 18px;
+        }
+
+        .form-required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            background: #f8fafc;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-hint i {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* ===== СЕТКА ПРЕДМЕТОВ (ИСПРАВЛЕНО) ===== */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .subject-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subject-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .subject-card.active {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff, #ede9fe);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .subject-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .subject-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .subject-count {
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        /* ===== БЛОК КОДА ===== */
+        .code-block-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .code-title {
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-lang-select {
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .code-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #1e293b;
+            color: #e2e8f0;
+            resize: vertical;
+            outline: none;
+        }
+
+        .code-textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .add-code-btn {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px dashed #94a3b8;
+            color: #475569;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-code-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        /* ===== ФАЙЛЫ ===== */
+        .file-upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .file-upload-icon {
+            font-size: 32px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .file-upload-title {
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-hint {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border-radius: 12px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            color: #3b82f6;
+            font-size: 20px;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .file-size {
+            color: #64748b;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
+        .file-remove {
+            color: #ef4444;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .file-remove:hover {
+            background: #fee2e2;
+        }
+
+        /* ===== ПОХОЖИЕ ВОПРОСЫ ===== */
+        .similar-questions {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .similar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .similar-header i {
+            color: #8b5cf6;
+        }
+
+        .similar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .similar-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .similar-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+        }
+
+        .similar-content {
+            flex: 1;
+        }
+
+        .similar-title {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .similar-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .similar-status {
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ===== КНОПКИ ФОРМЫ ===== */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        /* ===== ФУТЕР ===== */
+        .footer {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 50px 0 30px;
+            margin-top: 60px;
+            width: 100%;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        .footer-section {
+            width: 100%;
+        }
+
+        .footer-logo {
+            font-size: clamp(24px, 5vw, 28px);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 20px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-text {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            max-width: 300px;
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
+        }
+
+        .footer-heading {
+            font-size: clamp(16px, 4vw, 18px);
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: clamp(14px, 3vw, 16px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: #60a5fa;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            font-size: clamp(18px, 4vw, 22px);
+            color: #cbd5e1;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #60a5fa;
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding: 30px 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+
+        /* ===== АДАПТИВНОСТЬ ===== */
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 0;
+            }
+
+            .nav-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .main-content {
+                padding-top: 140px;
+            }
+
+            .ask-form {
+                padding: 24px;
+            }
+
+            .subject-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                width: 100%;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .code-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .code-lang-select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding-top: 160px;
+            }
+
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .file-upload-area {
+                padding: 20px;
+            }
+
+            .similar-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .similar-status {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- НАВИГАЦИЯ -->
+    <nav>
+        <div class="container">
+            <div class="nav-content">
+                <a href="feed.html" class="logo">
+                    <i class="fas fa-graduation-cap logo-icon"></i>
+                    Student<span>Hub</span>
+                </a>
+                
+                <div class="nav-user">
+                    <a href="feed.html" class="btn btn-outline btn-sm">
+                        <i class="fas fa-arrow-left"></i> К ленте
+                    </a>
+                    <a href="profile.html" class="nav-avatar">
+                        <span>А</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="main-content">
+        <div class="container">
+            <!-- ЗАГОЛОВОК -->
+            <div class="ask-header">
+                <h1>Задать вопрос</h1>
+                <p>Опишите вашу проблему максимально подробно. Это поможет получить качественный ответ быстрее.</p>
+            </div>
+
+            <!-- ФОРМА ВОПРОСА -->
+            <form class="ask-form" id="askForm">
+                <!-- 1. ЗАГОЛОВОК -->
+                <div class="form-section">
+                    <div class="form-label">
+                        <i class="fas fa-heading"></i>
+                        Заголовок
+                        <span class="form-required">*</span>
+                    </div>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        placeholder="Например: Как решить интеграл ∫x² dx?" 
+                        maxlength="150"
+                        id="questionTitle"
+                        required
+                    >
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        До 150 символов. Кратко и ёмко опишите суть вопроса.
+                    </div>
+                </div>
+
+                <!-- 2. ТЕКСТ ВОПРОСА -->
+                <div class="form-section">
+                    <div class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Текст вопроса
+                        <span class="form-required">*</span>
+                    </div>
+                    <textarea 
+                        class="form-textarea" 
+                        placeholder="Опишите вашу проблему. Что вы пытались сделать? Что не получается?"
+                        id="questionBody"
+                        required
+                    ></textarea>
+                    <div class="form-hint">
+                        <i class="fas fa-markdown"></i>
+                        Поддерживается Markdown, LaTeX ($$\frac{a}{b}$$) и вставка кода.
+                    </div>
+                </div>
+
+                <!-- 3. ВЫБОР ПРЕДМЕТА (ИСПРАВЛЕНО + ДРУГОЕ) -->
+                <div class="form-section">
+                    <div class="form-label">
+                        <i class="fas fa-book"></i>
+                        Предмет
+                        <span class="form-required">*</span>
+                    </div>
+                    
+                    <div class="subject-grid">
+                        <div class="subject-card active" data-subject="programming">
+                            <div class="subject-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Программирование</div>
+                                <div class="subject-count">2 341</div>
+                            </div>
+                        </div>
+                        <div class="subject-card" data-subject="math">
+                            <div class="subject-icon">
+                                <i class="fas fa-square-root-alt"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Математика</div>
+                                <div class="subject-count">1 892</div>
+                            </div>
+                        </div>
+                        <div class="subject-card" data-subject="physics">
+                            <div class="subject-icon">
+                                <i class="fas fa-atom"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Физика</div>
+                                <div class="subject-count">1 234</div>
+                            </div>
+                        </div>
+                        <div class="subject-card" data-subject="chemistry">
+                            <div class="subject-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Химия</div>
+                                <div class="subject-count">876</div>
+                            </div>
+                        </div>
+                        <div class="subject-card" data-subject="biology">
+                            <div class="subject-icon">
+                                <i class="fas fa-dna"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Биология</div>
+                                <div class="subject-count">654</div>
+                            </div>
+                        </div>
+                        <div class="subject-card" data-subject="economics">
+                            <div class="subject-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Экономика</div>
+                                <div class="subject-count">432</div>
+                            </div>
+                        </div>
+                        <!-- ДРУГОЕ -->
+                        <div class="subject-card" data-subject="other">
+                            <div class="subject-icon">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
+                            <div class="subject-info">
+                                <div class="subject-name">Другое</div>
+                                <div class="subject-count">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedSubject" value="programming">
+                </div>
+
+                <!-- 4. БЛОК КОДА -->
+                <div class="form-section">
+                    <div class="form-label">
+                        <i class="fas fa-code"></i>
+                        Блоки кода
+                    </div>
+                    
+                    <div id="codeBlocksContainer">
+                        <div class="code-block-section">
+                            <div class="code-header">
+                                <span class="code-title">
+                                    <i class="fas fa-terminal"></i>
+                                    Блок кода #1
+                                </span>
+                                <select class="code-lang-select">
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="python" selected>Python</option>
+                                    <option value="java">Java</option>
+                                    <option value="cpp">C++</option>
+                                    <option value="csharp">C#</option>
+                                    <option value="php">PHP</option>
+                                    <option value="ruby">Ruby</option>
+                                    <option value="go">Go</option>
+                                    <option value="rust">Rust</option>
+                                    <option value="sql">SQL</option>
+                                    <option value="html">HTML/CSS</option>
+                                    <option value="other">Другой</option>
+                                </select>
+                            </div>
+                            <textarea 
+                                class="code-textarea" 
+                                placeholder="Вставьте ваш код здесь..."
+                            >def quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quick_sort(left) + middle + quick_sort(right)</textarea>
+                            <button type="button" class="add-code-btn" onclick="alert('Добавление нового блока кода (будет реализовано)')">
+                                <i class="fas fa-plus-circle"></i>
+                                Добавить ещё блок кода
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Для вставки нескольких блоков используйте кнопку выше.
+                    </div>
+                </div>
+
+                <!-- 5. ПРИКРЕПЛЕНИЕ ФАЙЛОВ -->
+                <div class="form-section">
+                    <div class="form-label">
+                        <i class="fas fa-paperclip"></i>
+                        Прикреплённые файлы
+                    </div>
+                    
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-title">
+                            Нажмите для загрузки или перетащите файлы
+                        </div>
+                        <div class="file-upload-hint">
+                            JPG, PNG, PDF, TXT до 10 MB (макс. 3 файла)
+                        </div>
+                        <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf,.txt" style="display: none;">
+                    </div>
+
+                    <div class="file-list" id="fileList">
+                        <div class="file-item">
+                            <div class="file-info">
+                                <i class="fas fa-file-image file-icon"></i>
+                                <span class="file-name">screenshot_condition.png</span>
+                                <span class="file-size">1.2 MB</span>
+                            </div>
+                            <i class="fas fa-times file-remove" onclick="this.closest('.file-item').remove()"></i>
+                        </div>
+                        <div class="file-item">
+                            <div class="file-info">
+                                <i class="fas fa-file-pdf file-icon" style="color: #ef4444;"></i>
+                                <span class="file-name">lecture_notes.pdf</span>
+                                <span class="file-size">2.8 MB</span>
+                            </div>
+                            <i class="fas fa-times file-remove" onclick="this.closest('.file-item').remove()"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Максимум 3 файла. Допустимые форматы: JPG, PNG, PDF, TXT.
+                    </div>
+                </div>
+
+                <!-- 6. ПОХОЖИЕ ВОПРОСЫ -->
+                <div class="form-section">
+                    <div class="similar-questions">
+                        <div class="similar-header">
+                            <i class="fas fa-lightbulb"></i>
+                            Похожие вопросы (возможно, ответ уже есть)
+                        </div>
+                        <div class="similar-list" id="similarQuestions">
+                            <a href="question.html?id=45" class="similar-item">
+                                <div class="similar-content">
+                                    <div class="similar-title">
+                                        Как реализовать быструю сортировку на Python?
+                                    </div>
+                                    <div class="similar-meta">
+                                        <span><i class="fas fa-check-circle" style="color: #16a34a;"></i> 3 ответа</span>
+                                        <span><i class="fas fa-thumbs-up"></i> 45</span>
+                                    </div>
+                                </div>
+                                <span class="similar-status">Есть решение</span>
+                            </a>
+                            <a href="question.html?id=78" class="similar-item">
+                                <div class="similar-content">
+                                    <div class="similar-title">
+                                        Сортировка слиянием vs быстрая сортировка: что быстрее?
+                                    </div>
+                                    <div class="similar-meta">
+                                        <span><i class="fas fa-comment"></i> 8 ответов</span>
+                                        <span><i class="fas fa-thumbs-up"></i> 123</span>
+                                    </div>
+                                </div>
+                                <span class="similar-status">Есть решение</span>
+                            </a>
+                            <a href="question.html?id=92" class="similar-item">
+                                <div class="similar-content">
+                                    <div class="similar-title">
+                                        Ошибка рекурсии в quick sort: maximum recursion depth
+                                    </div>
+                                    <div class="similar-meta">
+                                        <span><i class="fas fa-comment"></i> 2 ответа</span>
+                                        <span><i class="fas fa-thumbs-up"></i> 12</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. КНОПКИ -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="window.location.href='feed.html'">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-paper-plane"></i> Опубликовать вопрос
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- ФУТЕР -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="feed.html" class="footer-logo">StudentHub</a>
+                    <p class="footer-text">
+                        Платформа академической взаимопомощи студентов. 
+                        Объединяем знания, ускоряем обучение.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Навигация</h4>
+                    <div class="footer-links">
+                        <a href="feed.html"><i class="fas fa-chevron-right"></i> Лента вопросов</a>
+                        <a href="ask.html"><i class="fas fa-chevron-right"></i> Задать вопрос</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Рейтинг пользователей</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Ресурсы</h4>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-chevron-right"></i> Помощь и FAQ</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Правила сообщества</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> О проекте</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Контакты</h4>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-envelope"></i> support@studenthub.com</a>
+                        <a href="#"><i class="fas fa-globe"></i> studenthub.com</a>
+                        <div class="social-links">
+                            <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
+                            <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+                            <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                © 2025 StudentHub. Все права защищены. Проект разработан студентами для студентов.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ВЫБОР ПРЕДМЕТА
+        document.querySelectorAll('.subject-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('selectedSubject').value = this.dataset.subject;
+            });
+        });
+
+        // ЗАГРУЗКА ФАЙЛОВ
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#3b82f6';
+            fileUploadArea.style.background = '#eff6ff';
+        });
+
+        fileUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#e2e8f0';
+            fileUploadArea.style.background = '#f8fafc';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#e2e8f0';
+            fileUploadArea.style.background = '#f8fafc';
+            alert('Файлы загружены (демо-режим)');
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                alert(`Выбрано файлов: ${this.files.length}\n(Будет реализовано с бэкендом)`);
+            }
+        });
+
+        // ПОХОЖИЕ ВОПРОСЫ (ЗАГЛУШКА)
+        const titleInput = document.getElementById('questionTitle');
+        const bodyInput = document.getElementById('questionBody');
+
+        function updateSimilarQuestions() {
+            const title = titleInput.value.trim();
+            const body = bodyInput.value.trim();
+            
+            if (title.length > 3 || body.length > 10) {
+                // Здесь будет API запрос
+            }
+        }
+
+        titleInput.addEventListener('input', updateSimilarQuestions);
+        bodyInput.addEventListener('input', updateSimilarQuestions);
+
+        // ОТПРАВКА ФОРМЫ
+        document.getElementById('askForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = titleInput.value.trim();
+            const body = bodyInput.value.trim();
+            const subject = document.getElementById('selectedSubject').value;
+
+            if (!title) {
+                alert('Пожалуйста, введите заголовок вопроса');
+                return;
+            }
+
+            if (!body) {
+                alert('Пожалуйста, опишите ваш вопрос');
+                return;
+            }
+
+            alert(`Вопрос отправлен на модерацию!\n\nЗаголовок: ${title}\nПредмет: ${subject}\n\n(Будет реализовано с бэкендом)`);
+            
+            setTimeout(() => {
+                window.location.href = 'feed.html';
+            }, 1000);
+        });
+
+        // АНИМАЦИЯ КНОПОК
+        document.querySelectorAll('.btn, .subject-card').forEach(el => {
+            el.addEventListener('click', function(e) {
+                if (!this.classList.contains('subject-card')) {
+                    this.style.transform = 'scale(0.96)';
+                    setTimeout(() => this.style.transform = '', 150);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

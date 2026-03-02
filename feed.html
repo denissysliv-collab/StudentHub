@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>StudentHub — Лента вопросов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== ПОЛНОСТЬЮ СОВМЕСТИМО С ПРЕДЫДУЩИМИ СТРАНИЦАМИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== НАВИГАЦИЯ (АВТОРИЗОВАННЫЙ ПОЛЬЗОВАТЕЛЬ) ===== */
+        nav {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .logo {
+            font-size: clamp(22px, 5vw, 26px);
+            font-weight: 800;
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: #8b5cf6;
+        }
+
+        .logo-icon {
+            font-size: clamp(24px, 6vw, 30px);
+        }
+
+        .nav-search {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .nav-search input {
+            width: 100%;
+            padding: 12px 20px 12px 48px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 15px;
+            background: white;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .nav-search input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-search i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-user-link {
+            color: #475569;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
+        }
+
+        .nav-user-link:hover {
+            color: #3b82f6;
+        }
+
+        .nav-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .btn {
+            padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 24px);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: clamp(14px, 3vw, 15px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 14px;
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content {
+            flex: 1 0 auto;
+            padding-top: 90px;
+            padding-bottom: 40px;
+            width: 100%;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .feed-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feed-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .feed-tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 4px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .feed-tab {
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+            font-size: 15px;
+        }
+
+        .feed-tab.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+
+        .feed-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 30px;
+        }
+
+        /* ===== ФИЛЬТРЫ ===== */
+        .filter-sidebar {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .filter-section {
+            margin-bottom: 28px;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            color: #334155;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .filter-clear {
+            color: #3b82f6;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .filter-clear:hover {
+            text-decoration: underline;
+        }
+
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .subject-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #475569;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+
+        .subject-item:hover {
+            color: #3b82f6;
+        }
+
+        .subject-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-radio {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #475569;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .status-radio input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+        }
+
+        .date-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .date-btn {
+            padding: 10px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .date-btn.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .apply-filters {
+            width: 100%;
+            margin-top: 16px;
+            background: #f1f5f9;
+            color: #334155;
+            border: none;
+            font-weight: 700;
+        }
+
+        .apply-filters:hover {
+            background: #e2e8f0;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== ЛЕНТА ВОПРОСОВ ===== */
+        .questions-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.08);
+            border-color: #3b82f6;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .question-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .question-title:hover {
+            color: #3b82f6;
+        }
+
+        .question-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .subject-badge {
+            background: linear-gradient(135deg, #e0f2fe, #ede9fe);
+            color: #3b82f6;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .author-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+        }
+
+        .question-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-item i {
+            font-size: 16px;
+        }
+
+        .solved-badge {
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 12px;
+        }
+
+        .question-preview {
+            color: #475569;
+            font-size: 15px;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ===== ПАГИНАЦИЯ ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+        .pagination-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #475569;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(.active):not(:disabled) {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== АДАПТИВНОСТЬ ===== */
+        @media (max-width: 1024px) {
+            .feed-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 0;
+            }
+
+            .nav-search {
+                max-width: 100%;
+                margin: 0;
+                width: 100%;
+            }
+
+            .nav-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .main-content {
+                padding-top: 160px;
+            }
+
+            .feed-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .feed-tabs {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .feed-tab {
+                flex: 1;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding-top: 180px;
+            }
+
+            .question-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .question-meta {
+                gap: 10px;
+            }
+
+            .question-stats {
+                flex-wrap: wrap;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover, .question-card:hover {
+                transform: none;
+            }
+            
+            .btn:active {
+                transform: scale(0.96);
+            }
+            
+            .question-card:active {
+                background: #f8fafc;
+            }
+        }
+
+        /* ===== ДЛЯ БУДУЩЕГО БЭКЕНДА ===== */
+        .loading-skeleton {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- НАВИГАЦИЯ (АВТОРИЗОВАННЫЙ ПОЛЬЗОВАТЕЛЬ) -->
+    <nav>
+        <div class="container">
+            <div class="nav-content">
+                <a href="feed.html" class="logo">
+                    <i class="fas fa-graduation-cap logo-icon"></i>
+                    Student<span>Hub</span>
+                </a>
+                
+                <div class="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="search" placeholder="Поиск по вопросам и ответам..." id="globalSearch">
+                </div>
+
+                <div class="nav-user">
+                    <div class="nav-user-menu">
+                        <a href="ask.html" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Задать вопрос
+                        </a>
+                    </div>
+                    <a href="profile.html" class="nav-avatar">
+                        <span>А</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="main-content">
+        <div class="container">
+            <!-- ХЕДЕР ЛЕНТЫ -->
+            <div class="feed-header">
+                <div class="feed-title">
+                    <h1>Вопросы</h1>
+                    <span class="subject-badge" style="background: #e2e8f0; color: #475569;">
+                        <i class="fas fa-hashtag"></i> 234 вопроса
+                    </span>
+                </div>
+                <div class="feed-tabs">
+                    <button class="feed-tab active">Последние</button>
+                    <button class="feed-tab">Популярные</button>
+                    <button class="feed-tab">Без ответа</button>
+                    <button class="feed-tab">Решённые</button>
+                </div>
+            </div>
+
+            <!-- ЛЕНТА С ФИЛЬТРАМИ -->
+            <div class="feed-layout">
+                <!-- САЙДБАР ФИЛЬТРОВ -->
+                <aside class="filter-sidebar">
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <span>Предметы</span>
+                            <button class="filter-clear" onclick="clearSubjects()">Сбросить</button>
+                        </div>
+                        <div class="subject-list">
+                            <label class="subject-item">
+                                <input type="checkbox" value="math"> Математика
+                                <span style="margin-left: auto; color: #94a3b8;">42</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="physics"> Физика
+                                <span style="margin-left: auto; color: #94a3b8;">38</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="programming"> Программирование
+                                <span style="margin-left: auto; color: #94a3b8;">67</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="chemistry"> Химия
+                                <span style="margin-left: auto; color: #94a3b8;">23</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="biology"> Биология
+                                <span style="margin-left: auto; color: #94a3b8;">19</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="economics"> Экономика
+                                <span style="margin-left: auto; color: #94a3b8;">15</span>
+                            </label>
+                            <label class="subject-item">
+                                <input type="checkbox" value="history"> История
+                                <span style="margin-left: auto; color: #94a3b8;">12</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <span>Статус</span>
+                            <button class="filter-clear" onclick="clearStatus()">Сбросить</button>
+                        </div>
+                        <div class="status-list">
+                            <label class="status-radio">
+                                <input type="radio" name="status" value="all" checked> Все
+                            </label>
+                            <label class="status-radio">
+                                <input type="radio" name="status" value="solved"> Есть решение
+                            </label>
+                            <label class="status-radio">
+                                <input type="radio" name="status" value="unsolved"> Без ответа
+                            </label>
+                            <label class="status-radio">
+                                <input type="radio" name="status" value="pending"> На модерации
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <span>За период</span>
+                            <button class="filter-clear" onclick="clearDate()">Сбросить</button>
+                        </div>
+                        <div class="date-filter">
+                            <button class="date-btn active">
+                                <i class="fas fa-calendar-day"></i> За день
+                            </button>
+                            <button class="date-btn">
+                                <i class="fas fa-calendar-week"></i> За неделю
+                            </button>
+                            <button class="date-btn">
+                                <i class="fas fa-calendar-alt"></i> За месяц
+                            </button>
+                            <button class="date-btn">
+                                <i class="fas fa-infinity"></i> За всё время
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn apply-filters">
+                        <i class="fas fa-sliders-h"></i> Применить фильтры
+                    </button>
+                </aside>
+
+                <!-- СПИСОК ВОПРОСОВ -->
+                <div class="questions-feed">
+                    <!-- ВОПРОС 1 (С РЕШЕНИЕМ) -->
+                    <a href="question.html?id=1" class="question-card">
+                        <div class="question-header">
+                            <span class="subject-badge">
+                                <i class="fas fa-code"></i> Программирование
+                            </span>
+                            <span class="solved-badge">
+                                <i class="fas fa-check-circle"></i> Решено
+                            </span>
+                        </div>
+                        <h2 class="question-title">
+                            Как реализовать JWT аутентификацию в Node.js с refresh токенами?
+                        </h2>
+                        <div class="question-preview">
+                            Пытаюсь сделать полноценную auth систему с access и refresh токенами. Access токен живет 15 минут, refresh 7 дней. Не понимаю как правильно организовать хранение refresh токенов на сервере и безопасно передавать их...
+                        </div>
+                        <div class="question-meta">
+                            <div class="author-info">
+                                <div class="author-avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                    <span>АК</span>
+                                </div>
+                                <span>Алексей Кузнецов</span>
+                                <span style="color: #94a3b8;">·</span>
+                                <span style="color: #64748b;">2 часа назад</span>
+                                <span style="color: #8b5cf6; font-weight: 700;">★ 156</span>
+                            </div>
+                        </div>
+                        <div class="question-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye" style="color: #94a3b8;"></i> 234
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment" style="color: #94a3b8;"></i> 12
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-thumbs-up" style="color: #94a3b8;"></i> 23
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- ВОПРОС 2 (БЕЗ ОТВЕТОВ) -->
+                    <a href="question.html?id=2" class="question-card">
+                        <div class="question-header">
+                            <span class="subject-badge">
+                                <i class="fas fa-square-root-alt"></i> Математика
+                            </span>
+                        </div>
+                        <h2 class="question-title">
+                            Как решить дифференциальное уравнение y'' + 2y' + y = e^(-x)?
+                        </h2>
+                        <div class="question-preview">
+                            Пробовал методом неопределенных коэффициентов, но частное решение получается слишком сложным. Может быть есть более простой способ? Буду благодарен за подробное объяснение с LaTeX...
+                        </div>
+                        <div class="question-meta">
+                            <div class="author-info">
+                                <div class="author-avatar" style="background: linear-gradient(135deg, #10b981, #34d399); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                    <span>ЕП</span>
+                                </div>
+                                <span>Екатерина Петрова</span>
+                                <span style="color: #94a3b8;">·</span>
+                                <span style="color: #64748b;">5 часов назад</span>
+                                <span style="color: #8b5cf6; font-weight: 700;">★ 89</span>
+                            </div>
+                        </div>
+                        <div class="question-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye" style="color: #94a3b8;"></i> 56
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment" style="color: #94a3b8;"></i> 3
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-thumbs-up" style="color: #94a3b8;"></i> 2
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- ВОПРОС 3 (С КОДОМ) -->
+                    <a href="question.html?id=3" class="question-card">
+                        <div class="question-header">
+                            <span class="subject-badge">
+                                <i class="fas fa-code"></i> Программирование
+                            </span>
+                        </div>
+                        <h2 class="question-title">
+                            React useEffect бесконечный рендеринг при передаче props
+                        </h2>
+                        <div class="question-preview">
+                            У меня есть компонент, который принимает объект в пропсах. Я использую этот объект в зависимостях useEffect, но из-за того что объект создается заново при каждом рендере родителя, эффект вызывается бесконечно...
+                        </div>
+                        <div class="question-meta">
+                            <div class="author-info">
+                                <div class="author-avatar" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                    <span>ДМ</span>
+                                </div>
+                                <span>Дмитрий Морозов</span>
+                                <span style="color: #94a3b8;">·</span>
+                                <span style="color: #64748b;">вчера</span>
+                                <span style="color: #8b5cf6; font-weight: 700;">★ 234</span>
+                            </div>
+                        </div>
+                        <div class="question-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye" style="color: #94a3b8;"></i> 178
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment" style="color: #94a3b8;"></i> 8
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-thumbs-up" style="color: #94a3b8;"></i> 15
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- ПАГИНАЦИЯ -->
+                    <div class="pagination">
+                        <button class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn">4</button>
+                        <button class="pagination-btn">5</button>
+                        <button class="pagination-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <button class="pagination-btn">12</button>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ФУТЕР (КОПИРУЙ ИЗ ПРЕДЫДУЩИХ СТРАНИЦ) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="feed.html" class="footer-logo">StudentHub</a>
+                    <p class="footer-text">
+                        Платформа академической взаимопомощи студентов. 
+                        Объединяем знания, ускоряем обучение.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Навигация</h4>
+                    <div class="footer-links">
+                        <a href="feed.html"><i class="fas fa-chevron-right"></i> Лента вопросов</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Популярные темы</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Рейтинг пользователей</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Ресурсы</h4>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-chevron-right"></i> Помощь и FAQ</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Правила сообщества</a>
+                        <a href="#"><i class="fas fa-chevron-right"></i> Для преподавателей</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Контакты</h4>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-envelope"></i> support@studenthub.com</a>
+                        <a href="#"><i class="fas fa-globe"></i> studenthub.com</a>
+                        <div class="social-links">
+                            <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
+                            <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+                            <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                © 2025 StudentHub. Все права защищены. Проект разработан студентами для студентов.
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* ===== СТИЛИ ФУТЕРА ===== */
+        .footer {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 50px 0 30px;
+            margin-top: 60px;
+            width: 100%;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        .footer-section {
+            width: 100%;
+        }
+
+        .footer-logo {
+            font-size: clamp(24px, 5vw, 28px);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 20px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-text {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            max-width: 300px;
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
+        }
+
+        .footer-heading {
+            font-size: clamp(16px, 4vw, 18px);
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: clamp(14px, 3vw, 16px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: #60a5fa;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            font-size: clamp(18px, 4vw, 22px);
+            color: #cbd5e1;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #60a5fa;
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding: 30px 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+    </style>
+
+    <script>
+        // ===== ДЛЯ БУДУЩЕГО БЭКЕНДА =====
+        // Здесь будут:
+        // - Загрузка вопросов через fetch/axios
+        // - Состояние фильтров
+        // - Пагинация
+        // - Поиск
+        // - JWT-токен из localStorage
+
+        // Функции-заглушки для сброса фильтров
+        window.clearSubjects = function() {
+            document.querySelectorAll('.subject-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+        }
+
+        window.clearStatus = function() {
+            document.querySelectorAll('.status-radio input[type="radio"]').forEach(radio => {
+                if (radio.value === 'all') radio.checked = true;
+            });
+        }
+
+        window.clearDate = function() {
+            document.querySelectorAll('.date-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.date-btn:first-child').classList.add('active');
+        }
+
+        // Анимация кнопок
+        document.querySelectorAll('.btn, .pagination-btn, .date-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!this.classList.contains('pagination-btn') || !this.disabled) {
+                    this.style.transform = 'scale(0.96)';
+                    setTimeout(() => this.style.transform = '', 150);
+                }
+            });
+        });
+
+        // Переключение табов
+        document.querySelectorAll('.feed-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                // Здесь потом будет загрузка вопросов
+            });
+        });
+
+        // Переключение дат
+        document.querySelectorAll('.date-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Поиск (заглушка)
+        document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                alert('Поиск по: ' + this.value + '\n(Будет реализовано с бэкендом)');
+            }
+        });
+
+        // Применить фильтры
+        document.querySelector('.apply-filters')?.addEventListener('click', function() {
+            alert('Фильтры применены (демо-режим)');
+        });
+
+        // Имитация авторизации (для демо)
+        window.addEventListener('load', function() {
+            // Здесь потом будет проверка JWT токена
+            console.log('Страница готова к подключению бэкенда');
+        });
+    </script>
+</body>
+</html>

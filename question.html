@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>StudentHub — Вопрос: JWT аутентификация</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        html, body { height: 100%; }
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+        .logo {
+            font-size: clamp(22px, 5vw, 26px);
+            font-weight: 800;
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span { color: #8b5cf6; }
+        .logo-icon { font-size: clamp(24px, 6vw, 30px); }
+        .nav-search {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            position: relative;
+        }
+        .nav-search input {
+            width: 100%;
+            padding: 10px 20px 10px 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 15px;
+            background: white;
+            outline: none;
+        }
+        .nav-search input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        .nav-search i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .nav-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .nav-avatar:hover { transform: scale(1.05); }
+        .btn {
+            padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 24px);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: clamp(14px, 3vw, 15px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            line-height: 1;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59,130,246,0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        .btn-sm { padding: 6px 14px; font-size: 14px; }
+
+        .main-content {
+            flex: 1 0 auto;
+            padding-top: 90px;
+            padding-bottom: 40px;
+        }
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .breadcrumbs a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .breadcrumbs a:hover { text-decoration: underline; }
+
+        /* ВОПРОС АВТОРА */
+        .question-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 8px 25px rgba(59,130,246,0.1);
+            position: relative;
+        }
+        .question-card::before {
+            content: 'Вопрос автора';
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: #3b82f6;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .subject-badge {
+            background: linear-gradient(135deg, #e0f2fe, #ede9fe);
+            color: #3b82f6;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .question-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+        .question-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+        }
+        .author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .author-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        .author-reputation {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #8b5cf6;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .question-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #64748b;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .question-body {
+            font-size: 16px;
+            color: #334155;
+            margin-bottom: 24px;
+        }
+        .question-body p { margin-bottom: 16px; }
+
+        .inline-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        .latex-inline {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-style: italic;
+        }
+
+        /* ФОРМА ОТВЕТА */
+        .answer-form-section {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 40px;
+            border: 1px solid #e2e8f0;
+        }
+        .answer-form-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Область файлов (как в DeepSeek) */
+        .files-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .files-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .files-toggle {
+            background: transparent;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .files-area {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px 0;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+            white-space: nowrap;
+            transition: max-height 0.3s ease;
+        }
+        .files-area.collapsed {
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+        .file-item {
+            background: #f1f5f9;
+            border-radius: 30px;
+            padding: 6px 16px 6px 12px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .file-item:hover {
+            background: #e2e8f0;
+        }
+        .file-item i {
+            color: #3b82f6;
+        }
+        .file-item .remove-file {
+            color: #ef4444;
+            cursor: pointer;
+            margin-left: 4px;
+            transition: color 0.2s;
+        }
+        .file-item .remove-file:hover {
+            color: #dc2626;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            align-items: center;
+        }
+        .tool-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tool-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+        .tool-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+        .tool-select:hover {
+            background: #e2e8f0;
+        }
+
+        /* Размер шрифта как в Word */
+        .font-size-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .font-size-input {
+            width: 60px;
+            padding: 6px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            outline: none;
+        }
+        .font-size-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        .font-size-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .font-size-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .editor-content {
+            min-height: 180px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: white;
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 16px;
+        }
+        .editor-content:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        .editor-content[data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            font-style: italic;
+        }
+        .editor-content[data-placeholder]:empty:focus:before {
+            content: '';
+        }
+
+        /* ОТВЕТЫ */
+        .answers-section {
+            margin-top: 40px;
+        }
+        .answers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .answers-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .answers-count span { color: #3b82f6; }
+        .answer-sort {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 4px;
+            border-radius: 12px;
+        }
+        .sort-btn {
+            padding: 6px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 14px;
+        }
+        .sort-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+
+        .answer-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px dashed #94a3b8;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .answer-card:hover {
+            border-color: #3b82f6;
+        }
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .answer-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .answer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .answer-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .answer-name {
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+        }
+        .answer-date {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .answer-body {
+            color: #334155;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        .voting {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 40px;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        .vote-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+        }
+        .reputation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .comments-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 12px 0 8px;
+        }
+        .comments-toggle-btn {
+            background: transparent;
+            border: none;
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+        }
+        .comments-toggle-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #3b82f6;
+        }
+        .comments-toggle-arrow:hover {
+            background: #e2e8f0;
+        }
+
+        .comments-container {
+            display: none;
+            margin-left: 24px;
+            margin-top: 16px;
+            border-left: 3px solid #3b82f6;
+            padding-left: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 0 16px 16px 0;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .comments-container.visible {
+            display: block;
+        }
+
+        .comments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            padding: 12px 0 8px;
+            z-index: 5;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .comments-header h4 {
+            font-size: 16px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .comment-sort {
+            display: flex;
+            gap: 8px;
+        }
+        .comment-sort-btn {
+            padding: 4px 12px;
+            border-radius: 30px;
+            background: #e2e8f0;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+        }
+        .comment-sort-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .comment-card {
+            background: #f9fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #edf2f7;
+            transition: 0.2s;
+        }
+        .comment-card.helped {
+            border: 2px solid #f9a8d4;
+            background: #fdf2f8;
+        }
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .comment-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .comment-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .helped-badge {
+            background: #f9a8d4;
+            color: #831843;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 30px;
+        }
+        .comment-date {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .comment-text {
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .comment-like {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .reply-btn {
+            background: transparent;
+            border: none;
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .reply-form {
+            margin-top: 12px;
+            display: none;
+        }
+        .reply-form.active {
+            display: block;
+        }
+        .reply-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            resize: vertical;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 50px 0 30px;
+            margin-top: 60px;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+        .footer-text {
+            color: #cbd5e1;
+            max-width: 300px;
+            font-size: 14px;
+        }
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .copyright {
+            text-align: center;
+            padding: 30px 20px 0;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+        }
+        .comments-container{
+            max-height: 700px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-content { flex-direction: column; gap: 10px; }
+            .main-content { padding-top: 140px; }
+            .comments-container { margin-left: 12px; padding-left: 12px; max-height: 350px; }
+        }
+
+        .color-picker-panel, .font-picker-panel, .heading-panel {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .color-picker-panel.active, .font-picker-panel.active, .heading-panel.active {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 200px;
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+        .font-option, .heading-option {
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: white;
+            width: 100%;
+            text-align: left;
+        }
+        .font-option:hover, .heading-option:hover {
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="nav-content">
+                <a href="feed.html" class="logo">
+                    <i class="fas fa-graduation-cap logo-icon"></i>
+                    Student<span>Hub</span>
+                </a>
+                <div class="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="search" placeholder="Поиск по вопросам...">
+                </div>
+                <div class="nav-user">
+                    <a href="ask.html" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Задать вопрос
+                    </a>
+                    <a href="profile.html" class="nav-avatar">
+                        <span>А</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="feed.html">Лента</a>
+                <i class="fas fa-chevron-right" style="font-size: 12px;"></i>
+                <a href="feed.html?subject=programming">Программирование</a>
+                <i class="fas fa-chevron-right" style="font-size: 12px;"></i>
+                <span>JWT аутентификация в Node.js</span>
+            </div>
+
+            <!-- ВОПРОС АВТОРА -->
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="subject-badge"><i class="fas fa-code"></i> Программирование</span>
+                </div>
+                <h1 class="question-title">Как реализовать JWT аутентификацию в Node.js с refresh токенами?</h1>
+                <div class="question-meta">
+                    <div class="author">
+                        <div class="author-avatar">АК</div>
+                        <div class="author-info">
+                            <a href="profile.html?id=1" class="author-name">Алексей Кузнецов</a>
+                            <span class="author-reputation"><i class="fas fa-star"></i> 156</span>
+                        </div>
+                    </div>
+                    <div class="question-stats">
+                        <span class="stat-item"><i class="fas fa-calendar"></i> 2 часа назад</span>
+                        <span class="stat-item"><i class="fas fa-eye"></i> 234</span>
+                    </div>
+                </div>
+                <div class="question-body">
+                    <p>Пытаюсь сделать полноценную auth систему с access и refresh токенами. Access живёт 15 минут, refresh — 7 дней. Не понимаю, как правильно организовать хранение refresh токенов на сервере и безопасно передавать их клиенту.</p>
+                    <p>Вот пример кода, который я использую сейчас:</p>
+                    <div style="background:#1e293b; color:#e2e8f0; padding:16px; border-radius:16px; font-family: monospace; margin:16px 0;">
+                        const jwt = require('jsonwebtoken');<br>
+                        function generateTokens(userId) {<br>
+                        &nbsp;&nbsp;const accessToken = jwt.sign({ userId }, process.env.ACCESS_SECRET, { expiresIn: '15m' });<br>
+                        &nbsp;&nbsp;const refreshToken = jwt.sign({ userId }, process.env.REFRESH_SECRET, { expiresIn: '7d' });<br>
+                        &nbsp;&nbsp;return { accessToken, refreshToken };<br>
+                        }
+                    </div>
+                    <p>Вопросы:</p>
+                    <ul style="margin-left:20px;">
+                        <li>Где хранить refresh токены? В БД или Redis?</li>
+                        <li>Как обновлять access токен через refresh?</li>
+                        <li>Нужно ли удалять refresh токен при выходе?</li>
+                    </ul>
+                    <p>Формула для проверки: <span class="latex-inline">$$\int_a^b x^2 dx$$</span></p>
+                    <img src="https://via.placeholder.com/600x200?text=JWT+Scheme" alt="JWT схема" class="inline-image">
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <span class="attachment"><i class="fas fa-file-code"></i> auth-diagram.png (234 KB)</span>
+                    <span class="attachment"><i class="fas fa-file-pdf"></i> jwt-spec.pdf (1.2 MB)</span>
+                </div>
+            </div>
+
+            <!-- ФОРМА ОТВЕТА (теперь сразу после вопроса) -->
+            <div class="answer-form-section">
+                <h3>Ваш ответ</h3>
+
+                <!-- Область прикреплённых файлов с возможностью сворачивания -->
+                <div class="files-header">
+                    <h4><i class="fas fa-paperclip"></i> Прикреплённые файлы</h4>
+                    <button class="files-toggle" id="filesToggle"><i class="fas fa-chevron-up"></i> Свернуть</button>
+                </div>
+                <div class="files-area" id="filesArea">
+                    <!-- Сюда будут добавляться файлы -->
+                </div>
+
+                <!-- Панель инструментов (обновлённая) -->
+                <div class="editor-toolbar">
+                    <button class="tool-btn" data-format="bold" title="Жирный"><i class="fas fa-bold"></i></button>
+                    <button class="tool-btn" data-format="italic" title="Курсив"><i class="fas fa-italic"></i></button>
+                    <button class="tool-btn" data-format="underline" title="Подчёркнутый"><i class="fas fa-underline"></i></button>
+                    <button class="tool-btn" data-format="strikeThrough" title="Зачёркнутый"><i class="fas fa-strikethrough"></i></button>
+                    <button class="tool-btn" data-format="insertUnorderedList" title="Список"><i class="fas fa-list"></i></button>
+                    
+                    <!-- Выпадающий список для заголовков -->
+                    <select class="tool-select" id="headingSelect">
+                        <option value="">Обычный текст</option>
+                        <option value="h1">Заголовок 1</option>
+                        <option value="h2">Заголовок 2</option>
+                        <option value="h3">Заголовок 3</option>
+                    </select>
+
+                    <!-- Выбор цвета текста -->
+                    <button class="tool-btn" data-format="color" title="Цвет текста"><i class="fas fa-palette"></i> Цвет</button>
+                    
+                    <!-- Выбор шрифта -->
+                    <select class="tool-select" id="fontSelect">
+                        <option value="">Шрифт</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                    </select>
+
+                    <!-- Размер шрифта как в Word -->
+                    <div class="font-size-control">
+                        <input type="text" class="font-size-input" id="fontSizeInput" value="14" placeholder="Размер">
+                        <button class="font-size-btn" id="fontSizeIncrease"><i class="fas fa-plus"></i></button>
+                        <button class="font-size-btn" id="fontSizeDecrease"><i class="fas fa-minus"></i></button>
+                    </div>
+
+                    <button class="tool-btn" data-format="file" title="Прикрепить файл"><i class="fas fa-paperclip"></i> Файл</button>
+                </div>
+
+                <!-- Область редактирования -->
+                <div class="editor-content" id="answerEditor" data-placeholder="Напишите ваш ответ... Можно использовать форматирование, заголовки, цвета." contenteditable="true">
+                </div>
+
+                <!-- Кнопки отправки -->
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Опубликовать</button>
+                    <button class="btn btn-outline"><i class="fas fa-save"></i> Черновик</button>
+                </div>
+            </div>
+
+            <!-- ОТВЕТЫ -->
+            <div class="answers-section">
+                <div class="answers-header">
+                    <div class="answers-count"><span>2</span> ответа</div>
+                    <div class="answer-sort">
+                        <button class="sort-btn active" data-sort="helpful">Сначала полезные</button>
+                        <button class="sort-btn" data-sort="newest">Сначала новые</button>
+                    </div>
+                </div>
+
+                <div class="answers-container">
+                    <!-- ОТВЕТ 1 -->
+                    <div class="answer-card" data-likes="46" data-date="2025-02-15T14:30:00">
+                        <div class="answer-header">
+                            <div class="answer-author">
+                                <div class="answer-avatar">ЕМ</div>
+                                <div class="answer-meta">
+                                    <span class="answer-name">Елена Морозова</span>
+                                    <span class="answer-date">30 минут назад</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="answer-body">
+                            <p>Рекомендую использовать Redis для хранения refresh токенов. Вот правильная архитектура:</p>
+                            <div style="background:#1e293b; color:#e2e8f0; padding:16px; border-radius:16px; font-family: monospace; margin:16px 0;">
+                                await redis.setex(`refresh:${userId}`, 7*24*60*60, refreshToken);
+                            </div>
+                            <p>Преимущества: автоматическое удаление по TTL, быстрый доступ.</p>
+                        </div>
+                        <div class="voting">
+                            <button class="vote-btn active"><i class="fas fa-thumbs-up"></i> 46</button>
+                            <button class="vote-btn"><i class="fas fa-thumbs-down"></i> 2</button>
+                        </div>
+                        <div class="comments-toggle">
+                            <button class="comments-toggle-btn" data-target="comments-1">
+                                <i class="fas fa-comment"></i> Комментарии (3)
+                            </button>
+                            <button class="comments-toggle-arrow" data-target="comments-1" aria-label="Свернуть/развернуть комментарии">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="comments-container" id="comments-1">
+                            <div class="comments-header">
+                                <h4><i class="fas fa-comments" style="color:#3b82f6;"></i> Комментарии</h4>
+                                <div class="comment-sort">
+                                    <button class="comment-sort-btn active" data-sort="helpful">Полезные</button>
+                                    <button class="comment-sort-btn" data-sort="date">По дате</button>
+                                </div>
+                            </div>
+                            <div class="comments-list" data-answer="1">
+                                <div class="comment-card helped" data-likes="12" data-helped="true" data-date="2025-02-15T14:40:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">ПК</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Павел Крылов <span class="helped-badge">Помогло автору</span></span>
+                                            <span class="comment-date">20 минут назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        А если использовать PostgreSQL с индексом по user_id? Тоже быстро. 
+                                        <span class="latex-inline">$$\text{SELECT} * FROM tokens$$</span>
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 12</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                    <div class="reply-form">
+                                        <textarea placeholder="Ваш ответ..." rows="2"></textarea>
+                                        <button class="btn btn-primary btn-sm">Отправить</button>
+                                        <button class="btn btn-outline btn-sm">Отмена</button>
+                                    </div>
+                                </div>
+                                <div class="comment-card" data-likes="5" data-helped="false" data-date="2025-02-15T14:45:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">АК</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Алексей Кузнецов</span>
+                                            <span class="comment-date">15 минут назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        Спасибо, а как часто обновлять refresh токен? Нужно ли при каждом запросе?
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 5</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                    <div class="reply-form">
+                                        <textarea placeholder="Ваш ответ..." rows="2"></textarea>
+                                        <button class="btn btn-primary btn-sm">Отправить</button>
+                                        <button class="btn btn-outline btn-sm">Отмена</button>
+                                    </div>
+                                </div>
+                                <div class="comment-card" data-likes="3" data-helped="false" data-date="2025-02-15T14:50:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">ДС</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Дмитрий Соколов</span>
+                                            <span class="comment-date">5 минут назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        Redis быстрее, но PostgreSQL надёжнее для долгосрочного хранения.
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 3</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                </div>
+                                <div class="comment-card" data-likes="8" data-helped="false" data-date="2025-02-15T14:55:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">ИП</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Иван Петров</span>
+                                            <span class="comment-date">2 минуты назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        А есть пример реализации на Fastify?
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 8</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                </div>
+                                <div class="comment-card" data-likes="4" data-helped="false" data-date="2025-02-15T14:58:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">СМ</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Светлана Миронова</span>
+                                            <span class="comment-date">1 минуту назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        Я использую Redis, очень довольна скоростью.
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 4</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ОТВЕТ 2 -->
+                    <div class="answer-card" data-likes="12" data-date="2025-02-15T14:15:00">
+                        <div class="answer-header">
+                            <div class="answer-author">
+                                <div class="answer-avatar" style="background:#f59e0b;">ДС</div>
+                                <div class="answer-meta">
+                                    <span class="answer-name">Дмитрий Соколов</span>
+                                    <span class="answer-date">45 минут назад</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="answer-body">
+                            <p>Я храню refresh токены в PostgreSQL. Для небольших проектов хватит. Вот структура таблицы:</p>
+                            <div style="background:#1e293b; color:#e2e8f0; padding:16px; border-radius:16px; font-family: monospace; margin:16px 0;">
+                                CREATE TABLE refresh_tokens (<br>
+                                &nbsp;&nbsp;user_id INT REFERENCES users(id),<br>
+                                &nbsp;&nbsp;token TEXT UNIQUE,<br>
+                                &nbsp;&nbsp;expires_at TIMESTAMP<br>
+                                );
+                            </div>
+                        </div>
+                        <div class="voting">
+                            <button class="vote-btn"><i class="fas fa-thumbs-up"></i> 12</button>
+                            <button class="vote-btn"><i class="fas fa-thumbs-down"></i> 1</button>
+                        </div>
+                        <div class="comments-toggle">
+                            <button class="comments-toggle-btn" data-target="comments-2">
+                                <i class="fas fa-comment"></i> Комментарии (1)
+                            </button>
+                            <button class="comments-toggle-arrow" data-target="comments-2" aria-label="Свернуть/развернуть комментарии">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="comments-container" id="comments-2">
+                            <div class="comments-header">
+                                <h4><i class="fas fa-comments" style="color:#3b82f6;"></i> Комментарии</h4>
+                                <div class="comment-sort">
+                                    <button class="comment-sort-btn active" data-sort="helpful">Полезные</button>
+                                    <button class="comment-sort-btn" data-sort="date">По дате</button>
+                                </div>
+                            </div>
+                            <div class="comments-list" data-answer="2">
+                                <div class="comment-card" data-likes="2" data-helped="false" data-date="2025-02-15T14:55:00">
+                                    <div class="comment-header">
+                                        <div class="comment-avatar">АК</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-name">Алексей Кузнецов</span>
+                                            <span class="comment-date">5 минут назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        А какую структуру таблицы посоветуешь? Добавлять индекс на token?
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-like"><i class="fas fa-thumbs-up"></i> 2</span>
+                                        <button class="reply-btn">Ответить</button>
+                                    </div>
+                                    <div class="reply-form">
+                                        <textarea placeholder="Ваш ответ..." rows="2"></textarea>
+                                        <button class="btn btn-primary btn-sm">Отправить</button>
+                                        <button class="btn btn-outline btn-sm">Отмена</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="feed.html" class="footer-logo">StudentHub</a>
+                    <p class="footer-text">Платформа академической взаимопомощи студентов.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <div class="footer-links">
+                        <a href="feed.html"><i class="fas fa-chevron-right"></i> Лента</a>
+                        <a href="ask.html"><i class="fas fa-chevron-right"></i> Задать вопрос</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">© 2025 StudentHub</div>
+        </div>
+    </footer>
+
+    <script>
+        // Функция переключения комментариев (общая для кнопки и стрелки)
+        function toggleComments(targetId, buttonElement, arrowElement) {
+            const commentsBlock = document.getElementById(targetId);
+            commentsBlock.classList.toggle('visible');
+            const icon = buttonElement.querySelector('i');
+            if (commentsBlock.classList.contains('visible')) {
+                icon.classList.remove('fa-comment');
+                icon.classList.add('fa-comment-dots');
+                arrowElement.innerHTML = '<i class="fas fa-chevron-up"></i>';
+            } else {
+                icon.classList.remove('fa-comment-dots');
+                icon.classList.add('fa-comment');
+                arrowElement.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            }
+        }
+
+        document.querySelectorAll('.comments-toggle').forEach(toggle => {
+            const textBtn = toggle.querySelector('.comments-toggle-btn');
+            const arrowBtn = toggle.querySelector('.comments-toggle-arrow');
+            const targetId = textBtn.dataset.target;
+            textBtn.addEventListener('click', (e) => { e.preventDefault(); toggleComments(targetId, textBtn, arrowBtn); });
+            arrowBtn.addEventListener('click', (e) => { e.preventDefault(); toggleComments(targetId, textBtn, arrowBtn); });
+        });
+
+        // Сортировка комментариев (демо)
+        function sortComments(container, sortBy) {
+            const list = container.querySelector('.comments-list');
+            const comments = Array.from(list.children).filter(el => el.classList.contains('comment-card'));
+            comments.sort((a, b) => {
+                if (sortBy === 'helpful') {
+                    const aHelped = a.classList.contains('helped');
+                    const bHelped = b.classList.contains('helped');
+                    if (aHelped && !bHelped) return -1;
+                    if (!aHelped && bHelped) return 1;
+                    const aLikes = parseInt(a.dataset.likes) || 0;
+                    const bLikes = parseInt(b.dataset.likes) || 0;
+                    return bLikes - aLikes;
+                } else {
+                    const aDate = new Date(a.dataset.date || 0);
+                    const bDate = new Date(b.dataset.date || 0);
+                    return bDate - aDate;
+                }
+            });
+            comments.forEach(c => list.appendChild(c));
+        }
+
+        document.querySelectorAll('.comment-sort-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const container = this.closest('.comments-container');
+                const sortBy = this.dataset.sort;
+                container.querySelectorAll('.comment-sort-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                sortComments(container, sortBy);
+            });
+        });
+
+        document.querySelectorAll('.reply-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const form = this.closest('.comment-card').querySelector('.reply-form');
+                if (form) form.classList.toggle('active');
+            });
+        });
+
+        document.querySelectorAll('.reply-form .btn-outline').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.reply-form').classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.vote-btn, .comment-like').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+            });
+        });
+
+        const answerSortBtns = document.querySelectorAll('.answer-sort .sort-btn');
+        const answersContainer = document.querySelector('.answers-container');
+        const answers = Array.from(document.querySelectorAll('.answer-card'));
+        answerSortBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                answerSortBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const sortBy = this.dataset.sort;
+                const sorted = [...answers].sort((a, b) => {
+                    if (sortBy === 'helpful') {
+                        const aLikes = parseInt(a.dataset.likes) || 0;
+                        const bLikes = parseInt(b.dataset.likes) || 0;
+                        return bLikes - aLikes;
+                    } else {
+                        const aDate = new Date(a.dataset.date || 0);
+                        const bDate = new Date(b.dataset.date || 0);
+                        return bDate - aDate;
+                    }
+                });
+                answersContainer.innerHTML = '';
+                sorted.forEach(a => answersContainer.appendChild(a));
+            });
+        });
+
+        // ===== НОВЫЙ РЕДАКТОР =====
+        (function() {
+            const editor = document.getElementById('answerEditor');
+            const toolbar = document.querySelector('.editor-toolbar');
+            const filesArea = document.getElementById('filesArea');
+            const filesToggle = document.getElementById('filesToggle');
+            let fileCounter = 0;
+            const uploadedFiles = []; // для хранения объектов URL
+
+            if (!editor || !toolbar) return;
+
+            // Установка начального placeholder
+            if (editor.innerHTML.trim() === '') {
+                editor.innerHTML = '';
+            }
+
+            // Вспомогательная функция для вставки HTML в позицию курсора внутри редактора
+            function insertHtmlIntoEditor(html) {
+                editor.focus();
+                const sel = window.getSelection();
+                let range;
+                if (sel.rangeCount > 0) {
+                    range = sel.getRangeAt(0);
+                    if (!editor.contains(range.commonAncestorContainer)) {
+                        range = document.createRange();
+                        range.selectNodeContents(editor);
+                        range.collapse(false);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                } else {
+                    range = document.createRange();
+                    range.selectNodeContents(editor);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                const fragment = range.createContextualFragment(html);
+                range.deleteContents();
+                range.insertNode(fragment);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+
+            // Обработка кнопок форматирования
+            toolbar.addEventListener('click', (e) => {
+                const btn = e.target.closest('.tool-btn');
+                if (!btn) return;
+                const format = btn.dataset.format;
+
+                if (['bold', 'italic', 'underline', 'strikeThrough', 'insertUnorderedList'].includes(format)) {
+                    editor.focus();
+                    document.execCommand(format, false, null);
+                }
+                else if (format === 'color') {
+                    const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000'];
+                    const panel = document.createElement('div');
+                    panel.className = 'color-picker-panel active';
+                    colors.forEach(c => {
+                        const swatch = document.createElement('div');
+                        swatch.className = 'color-option';
+                        swatch.style.backgroundColor = c;
+                        swatch.addEventListener('click', () => {
+                            editor.focus();
+                            document.execCommand('foreColor', false, c);
+                            panel.remove();
+                        });
+                        panel.appendChild(swatch);
+                    });
+                    const rect = btn.getBoundingClientRect();
+                    panel.style.position = 'absolute';
+                    panel.style.top = (rect.bottom + window.scrollY) + 'px';
+                    panel.style.left = (rect.left + window.scrollX) + 'px';
+                    document.body.appendChild(panel);
+                    setTimeout(() => {
+                        document.addEventListener('click', function closePanel(e) {
+                            if (!panel.contains(e.target) && e.target !== btn) {
+                                panel.remove();
+                                document.removeEventListener('click', closePanel);
+                            }
+                        });
+                    }, 10);
+                }
+                else if (format === 'file') {
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.multiple = true; // можно выбрать несколько
+                    fileInput.style.display = 'none';
+                    document.body.appendChild(fileInput);
+                    fileInput.click();
+                    fileInput.addEventListener('change', () => {
+                        if (fileInput.files.length > 0) {
+                            for (let i = 0; i < fileInput.files.length; i++) {
+                                const file = fileInput.files[i];
+                                const fileName = file.name;
+                                const fileId = 'file_' + Date.now() + '_' + (fileCounter++);
+                                
+                                // Создаём временный URL для файла
+                                const fileURL = URL.createObjectURL(file);
+                                uploadedFiles.push({ id: fileId, url: fileURL, name: fileName });
+
+                                // Добавляем файл в область файлов
+                                const fileItem = document.createElement('div');
+                                fileItem.className = 'file-item';
+                                fileItem.dataset.fileId = fileId;
+                                fileItem.setAttribute('data-url', fileURL);
+                                fileItem.innerHTML = `
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>${fileName}</span>
+                                    <span class="remove-file" title="Удалить"><i class="fas fa-times"></i></span>
+                                `;
+                                // При клике на файл (кроме крестика) открываем в новой вкладке
+                                fileItem.addEventListener('click', (e) => {
+                                    if (!e.target.closest('.remove-file')) {
+                                        window.open(fileURL, '_blank');
+                                    }
+                                });
+                                filesArea.appendChild(fileItem);
+                            }
+                        }
+                        fileInput.remove();
+                    });
+                }
+
+                e.preventDefault();
+            });
+
+            // Удаление файла по клику на крестик
+            filesArea.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-file')) {
+                    e.stopPropagation(); // чтобы не сработало открытие файла
+                    const fileItem = e.target.closest('.file-item');
+                    if (fileItem) {
+                        const fileId = fileItem.dataset.fileId;
+                        // Найти и освободить URL
+                        const index = uploadedFiles.findIndex(f => f.id === fileId);
+                        if (index !== -1) {
+                            URL.revokeObjectURL(uploadedFiles[index].url);
+                            uploadedFiles.splice(index, 1);
+                        }
+                        fileItem.remove();
+                    }
+                }
+            });
+
+            // Сворачивание/разворачивание области файлов
+            filesToggle.addEventListener('click', () => {
+                filesArea.classList.toggle('collapsed');
+                const icon = filesToggle.querySelector('i');
+                if (filesArea.classList.contains('collapsed')) {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                    filesToggle.innerHTML = '<i class="fas fa-chevron-down"></i> Развернуть';
+                } else {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                    filesToggle.innerHTML = '<i class="fas fa-chevron-up"></i> Свернуть';
+                }
+            });
+
+            // Выбор заголовка
+            const headingSelect = document.getElementById('headingSelect');
+            headingSelect.addEventListener('change', () => {
+                const value = headingSelect.value;
+                if (!value) return;
+                editor.focus();
+                if (value === 'h1' || value === 'h2' || value === 'h3') {
+                    document.execCommand('formatBlock', false, value);
+                }
+                headingSelect.value = ''; // сброс
+            });
+
+            // Выбор шрифта
+            const fontSelect = document.getElementById('fontSelect');
+            fontSelect.addEventListener('change', () => {
+                const font = fontSelect.value;
+                if (!font) return;
+                editor.focus();
+                document.execCommand('fontName', false, font);
+                fontSelect.value = '';
+            });
+
+            // Размер шрифта
+            const fontSizeInput = document.getElementById('fontSizeInput');
+            const increaseBtn = document.getElementById('fontSizeIncrease');
+            const decreaseBtn = document.getElementById('fontSizeDecrease');
+
+            function setFontSize(size) {
+                editor.focus();
+                // Преобразуем в строку, так как execCommand ожидает строку
+                document.execCommand('fontSize', false, size.toString());
+            }
+
+            increaseBtn.addEventListener('click', () => {
+                let size = parseInt(fontSizeInput.value, 10);
+                if (isNaN(size)) size = 14;
+                size = Math.min(72, size + 1);
+                fontSizeInput.value = size;
+                setFontSize(size);
+            });
+
+            decreaseBtn.addEventListener('click', () => {
+                let size = parseInt(fontSizeInput.value, 10);
+                if (isNaN(size)) size = 14;
+                size = Math.max(8, size - 1);
+                fontSizeInput.value = size;
+                setFontSize(size);
+            });
+
+            fontSizeInput.addEventListener('change', () => {
+                let size = parseInt(fontSizeInput.value, 10);
+                if (isNaN(size) || size < 8) size = 8;
+                if (size > 72) size = 72;
+                fontSizeInput.value = size;
+                setFontSize(size);
+            });
+
+            // Также можно применить размер по умолчанию при фокусе?
+        })();
+    </script>
+</body>
+</html>
