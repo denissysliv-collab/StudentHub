@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>StudentHub — Задать вопрос</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Quill редактор -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         /* ===== ОБЩИЕ СТИЛИ ===== */
         * {
@@ -34,7 +36,7 @@
             padding: 0 20px;
         }
 
-        /* ===== НАВИГАЦИЯ ===== */
+        /* ===== НАВИГАЦИЯ (из feed.html) ===== */
         nav {
             background-color: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
@@ -72,10 +74,79 @@
             font-size: clamp(24px, 6vw, 30px);
         }
 
-        .nav-user {
+        .burger-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 22px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 1100;
+        }
+
+        .burger-btn span {
+            width: 100%;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .burger-btn.active span:nth-child(1) {
+            transform: translateY(9px) rotate(45deg);
+        }
+        .burger-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .burger-btn.active span:nth-child(3) {
+            transform: translateY(-9px) rotate(-45deg);
+        }
+
+        .nav-menu {
             display: flex;
             align-items: center;
             gap: 20px;
+        }
+
+        .nav-search {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .nav-search input {
+            width: 100%;
+            padding: 12px 20px 12px 48px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 15px;
+            background: white;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .nav-search input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-search i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .nav-user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .nav-avatar {
@@ -98,6 +169,61 @@
             transform: scale(1.05);
         }
 
+        @media (max-width: 768px) {
+            .nav-content {
+                padding: 12px 0;
+                gap: 20px;
+            }
+
+            .burger-btn {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+                gap: 20px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 900;
+                border-radius: 0 0 24px 24px;
+            }
+
+            .nav-menu.active {
+                transform: translateY(0);
+            }
+
+            .nav-search {
+                max-width: 100%;
+                margin: 0;
+            }
+
+            .nav-user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-user-menu .btn-sm {
+                padding: 12px 24px;
+                font-size: 16px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                display: none;
+            }
+        }
+
+        /* ===== КНОПКИ (оставлены из ask.html) ===== */
         .btn {
             padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 24px);
             border-radius: 8px;
@@ -215,9 +341,7 @@
             margin-left: 4px;
         }
 
-        .form-input,
-        .form-textarea,
-        .form-select {
+        .form-input {
             width: 100%;
             padding: 14px 18px;
             border: 1px solid #e2e8f0;
@@ -228,17 +352,15 @@
             outline: none;
         }
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
+        .form-input:focus {
             border-color: #3b82f6;
             background: white;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
-        .form-textarea {
-            min-height: 180px;
-            resize: vertical;
+        .form-input.error {
+            border-color: #ef4444;
+            background: #fef2f2;
         }
 
         .form-hint {
@@ -255,7 +377,60 @@
             font-size: 14px;
         }
 
-        /* ===== СЕТКА ПРЕДМЕТОВ (ИСПРАВЛЕНО) ===== */
+        /* ===== СВОРАЧИВАЕМЫЕ СЕКЦИИ ===== */
+        .collapsible-section {
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+            user-select: none;
+            border-radius: 8px;
+        }
+
+        .section-header:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .section-header:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .section-header h3 i {
+            color: #3b82f6;
+        }
+
+        .section-header .fa-chevron-down {
+            color: #3b82f6;
+            transition: transform 0.3s;
+        }
+
+        .section-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 1000px;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+        }
+
+        /* ===== БЛОК ТЕМЫ ===== */
         .subject-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -319,79 +494,94 @@
             white-space: nowrap;
         }
 
-        /* ===== БЛОК КОДА ===== */
-        .code-block-section {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 16px;
+        /* Поле для своей темы */
+        .custom-subject-field {
+            grid-column: 1 / -1;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .custom-subject-field.visible {
+            display: block;
+        }
+
+        /* ===== РЕДАКТОР QUILL ===== */
+        .quill-wrapper {
             border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #f8fafc;
+            overflow: hidden;
         }
 
-        .code-header {
+        .ql-toolbar {
+            border: none;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 16px 16px 0 0;
+            padding: 12px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .code-title {
-            font-weight: 700;
-            color: #334155;
-            display: flex;
-            align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
         }
 
-        .code-lang-select {
-            padding: 8px 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+        .ql-toolbar button {
             background: white;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .code-textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 16px;
             border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: #1e293b;
-            color: #e2e8f0;
-            resize: vertical;
-            outline: none;
-        }
-
-        .code-textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .add-code-btn {
-            margin-top: 16px;
-            background: transparent;
-            border: 1px dashed #94a3b8;
-            color: #475569;
-            padding: 10px 18px;
-            border-radius: 40px;
+            border-radius: 30px;
+            padding: 8px 16px;
             font-size: 14px;
             font-weight: 600;
+            color: #334155;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            cursor: pointer;
             transition: all 0.2s;
+            outline: none;
         }
 
-        .add-code-btn:hover {
-            border-color: #3b82f6;
+        .ql-toolbar button:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .ql-toolbar button i {
             color: #3b82f6;
-            background: #eff6ff;
+        }
+
+        .ql-container {
+            border: none;
+            min-height: 250px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .ql-editor {
+            min-height: 250px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 16px;
+        }
+
+        .ql-editor pre {
+            background: #1e293b !important;
+            color: #e2e8f0 !important;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+
+        .ql-editor code {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: 'Courier New', monospace;
         }
 
         /* ===== ФАЙЛЫ ===== */
@@ -478,79 +668,6 @@
             background: #fee2e2;
         }
 
-        /* ===== ПОХОЖИЕ ВОПРОСЫ ===== */
-        .similar-questions {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 16px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .similar-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #475569;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .similar-header i {
-            color: #8b5cf6;
-        }
-
-        .similar-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .similar-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: white;
-            border-radius: 16px;
-            text-decoration: none;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .similar-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
-        }
-
-        .similar-content {
-            flex: 1;
-        }
-
-        .similar-title {
-            color: #1e293b;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 15px;
-        }
-
-        .similar-meta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .similar-status {
-            background: #dcfce7;
-            color: #16a34a;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
         /* ===== КНОПКИ ФОРМЫ ===== */
         .form-actions {
             display: flex;
@@ -560,110 +677,76 @@
             margin-top: 32px;
         }
 
-        /* ===== ФУТЕР ===== */
-        .footer {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            color: white;
-            padding: 50px 0 30px;
-            margin-top: 60px;
-            width: 100%;
+        .form-actions .btn {
+            flex: 1;
         }
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            padding: 0 20px;
-        }
-
-        .footer-section {
-            width: 100%;
-        }
-
-        .footer-logo {
-            font-size: clamp(24px, 5vw, 28px);
-            font-weight: 800;
-            color: white;
-            margin-bottom: 20px;
-            display: block;
-            text-decoration: none;
-        }
-
-        .footer-text {
-            color: #cbd5e1;
-            margin-bottom: 24px;
-            max-width: 300px;
-            font-size: clamp(14px, 3vw, 16px);
-            line-height: 1.6;
-        }
-
-        .footer-heading {
-            font-size: clamp(16px, 4vw, 18px);
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .footer-links {
+        /* ===== УВЕДОМЛЕНИЯ ===== */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .footer-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: color 0.3s;
-            font-size: clamp(14px, 3vw, 16px);
-            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            border-left: 4px solid;
         }
 
-        .footer-links a:hover {
-            color: #60a5fa;
+        .notification.show {
+            transform: translateX(0);
         }
 
-        .social-links {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        .notification.success {
+            border-left-color: #10b981;
         }
 
-        .social-links a {
-            font-size: clamp(18px, 4vw, 22px);
-            color: #cbd5e1;
-            transition: color 0.3s, transform 0.3s;
+        .notification.error {
+            border-left-color: #ef4444;
         }
 
-        .social-links a:hover {
-            color: #60a5fa;
-            transform: translateY(-3px);
+        .notification i {
+            font-size: 24px;
         }
 
-        .copyright {
-            text-align: center;
-            padding: 30px 20px 0;
-            margin-top: 40px;
-            border-top: 1px solid #334155;
-            color: #94a3b8;
-            font-size: clamp(12px, 3vw, 14px);
+        .notification.success i {
+            color: #10b981;
+        }
+
+        .notification.error i {
+            color: #ef4444;
+        }
+
+        .notification-message {
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .section-header{
+            padding: 10px 10px 10px 0px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* ===== АДАПТИВНОСТЬ ===== */
         @media (max-width: 768px) {
-            .nav-content {
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px 0;
-            }
-
-            .nav-user {
-                width: 100%;
-                justify-content: space-between;
-            }
-
             .main-content {
                 padding-top: 140px;
             }
@@ -685,56 +768,61 @@
                 width: 100%;
             }
 
-            .code-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
+            .ql-toolbar.ql-snow {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: space-evenly !important;
+                gap: 8px !important;
+                flex-direction: row !important;
+                align-items: center !important;
             }
 
-            .code-lang-select {
-                width: 100%;
+            .ql-toolbar.ql-snow > * {
+                flex: 0 0 auto !important;
+                margin: 0 !important;
+            }
+
+            .ql-toolbar.ql-snow button {
+                width: auto !important;
+                min-width: 40px;
+                justify-content: center;
+            }
+
+            .ql-toolbar.ql-snow select {
+                width: auto !important;
+                min-width: 80px;
             }
         }
 
         @media (max-width: 480px) {
-            .main-content {
-                padding-top: 160px;
-            }
-
             .subject-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .file-upload-area {
-                padding: 20px;
-            }
-
-            .similar-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .similar-status {
-                align-self: flex-start;
+                grid-template-columns: 1fr !important;
             }
         }
     </style>
 </head>
 <body>
-    <!-- НАВИГАЦИЯ -->
+    <!-- НАВИГАЦИЯ (скопирована из feed.html) -->
     <nav>
         <div class="container">
             <div class="nav-content">
                 <a href="feed.html" class="logo">
                     <i class="fas fa-graduation-cap logo-icon"></i>
-                    Student<span>Hub</span>
+                    <span class="logo-text">Student<span>Hub</span></span>
                 </a>
-                
-                <div class="nav-user">
-                    <a href="feed.html" class="btn btn-outline btn-sm">
-                        <i class="fas fa-arrow-left"></i> К ленте
-                    </a>
+               
+                <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="nav-menu" id="navMenu">
+                    <div class="nav-user-menu">
+                        <a href="feed.html" class="btn btn-primary btn-sm">
+                            <i class="fas fa-arrow-left"></i> К ленте
+                        </a>
+                    </div>
                     <a href="profile.html" class="nav-avatar">
                         <span>А</span>
                     </a>
@@ -746,424 +834,351 @@
     <!-- ОСНОВНОЙ КОНТЕНТ -->
     <main class="main-content">
         <div class="container">
-            <!-- ЗАГОЛОВОК -->
             <div class="ask-header">
                 <h1>Задать вопрос</h1>
-                <p>Опишите вашу проблему максимально подробно. Это поможет получить качественный ответ быстрее.</p>
+                <p>Опишите вашу проблему. Используйте панель инструментов для форматирования текста.</p>
             </div>
 
-            <!-- ФОРМА ВОПРОСА -->
             <form class="ask-form" id="askForm">
-                <!-- 1. ЗАГОЛОВОК -->
+                <!-- Заголовок -->
                 <div class="form-section">
                     <div class="form-label">
-                        <i class="fas fa-heading"></i>
-                        Заголовок
-                        <span class="form-required">*</span>
+                        <i class="fas fa-heading"></i> Заголовок <span class="form-required">*</span>
                     </div>
-                    <input 
-                        type="text" 
-                        class="form-input" 
-                        placeholder="Например: Как решить интеграл ∫x² dx?" 
-                        maxlength="150"
-                        id="questionTitle"
-                        required
-                    >
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        До 150 символов. Кратко и ёмко опишите суть вопроса.
+                    <input type="text" class="form-input" placeholder="Например: Как решить интеграл ∫x² dx?" maxlength="150" id="questionTitle" required>
+                    <div class="form-hint"><i class="fas fa-info-circle"></i> До 150 символов.</div>
+                </div>
+
+                <!-- Тема (сворачиваемая) -->
+                <div class="form-section collapsible-section" id="subjectSection">
+                    <div class="section-header" id="subjectHeader" role="button" tabindex="0" aria-expanded="true" aria-controls="subjectContent">
+                        <h3><i class="fas fa-book"></i> Тема <span class="form-required">*</span></h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content" id="subjectContent">
+                        <div class="subject-grid">
+                            <!-- Другое -->
+                            <div class="subject-card" data-subject="other">
+                                <div class="subject-icon"><i class="fas fa-ellipsis-h"></i></div>
+                                <div class="subject-info"><div class="subject-name">Другое</div><div class="subject-count">—</div></div>
+                            </div>
+                            <div class="custom-subject-field" id="customSubjectField">
+                                <input type="text" class="form-input" placeholder="Введите название темы" id="customSubject">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> Укажите свою тему</div>
+                            </div>
+                            <!-- Основные темы -->
+                            <div class="subject-card active" data-subject="programming"><div class="subject-icon"><i class="fas fa-code"></i></div><div class="subject-info"><div class="subject-name">Программирование</div><div class="subject-count">2 341</div></div></div>
+                            <div class="subject-card" data-subject="math"><div class="subject-icon"><i class="fas fa-square-root-alt"></i></div><div class="subject-info"><div class="subject-name">Математика</div><div class="subject-count">1 892</div></div></div>
+                            <div class="subject-card" data-subject="physics"><div class="subject-icon"><i class="fas fa-atom"></i></div><div class="subject-info"><div class="subject-name">Физика</div><div class="subject-count">1 234</div></div></div>
+                            <div class="subject-card" data-subject="chemistry"><div class="subject-icon"><i class="fas fa-flask"></i></div><div class="subject-info"><div class="subject-name">Химия</div><div class="subject-count">876</div></div></div>
+                            <div class="subject-card" data-subject="biology"><div class="subject-icon"><i class="fas fa-dna"></i></div><div class="subject-info"><div class="subject-name">Биология</div><div class="subject-count">654</div></div></div>
+                            <div class="subject-card" data-subject="economics"><div class="subject-icon"><i class="fas fa-chart-line"></i></div><div class="subject-info"><div class="subject-name">Экономика</div><div class="subject-count">432</div></div></div>
+                        </div>
+                        <input type="hidden" id="selectedSubject" value="programming">
                     </div>
                 </div>
 
-                <!-- 2. ТЕКСТ ВОПРОСА -->
+                <!-- Текст вопроса (Quill) -->
                 <div class="form-section">
-                    <div class="form-label">
-                        <i class="fas fa-align-left"></i>
-                        Текст вопроса
-                        <span class="form-required">*</span>
+                    <div class="form-label"><i class="fas fa-align-left"></i> Текст вопроса <span class="form-required">*</span></div>
+                    <div class="quill-wrapper">
+                        <div id="toolbar">
+                            <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
+                            <select class="ql-header"><option value="1">H1</option><option value="2">H2</option><option value="3">H3</option><option value="4">H4</option><option value="5">H5</option><option value="6">H6</option><option selected>Обычный</option></select>
+                            <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
+                            <select class="ql-color"><option value="red">Красный</option><option value="green">Зелёный</option><option value="blue">Синий</option><option value="orange">Оранжевый</option><option value="violet">Фиолетовый</option><option value="#d0d0d0">Серый</option><option selected>Чёрный</option></select>
+                            <select class="ql-background"><option selected>Без фона</option><option value="yellow">Жёлтый</option><option value="cyan">Голубой</option><option value="magenta">Розовый</option></select>
+                        </div>
+                        <div id="editor"></div>
                     </div>
-                    <textarea 
-                        class="form-textarea" 
-                        placeholder="Опишите вашу проблему. Что вы пытались сделать? Что не получается?"
-                        id="questionBody"
-                        required
-                    ></textarea>
-                    <div class="form-hint">
-                        <i class="fas fa-markdown"></i>
-                        Поддерживается Markdown, LaTeX ($$\frac{a}{b}$$) и вставка кода.
+                    <div class="form-hint"><i class="fas fa-info-circle"></i> Используйте панель для форматирования текста.</div>
+                </div>
+
+                <!-- Файлы (сворачиваемая) -->
+                <div class="form-section collapsible-section" id="filesSection">
+                    <div class="section-header" id="filesHeader" role="button" tabindex="0" aria-expanded="true" aria-controls="filesContent">
+                        <h3><i class="fas fa-paperclip"></i> Прикреплённые файлы</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-content" id="filesContent">
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="file-upload-title">Нажмите для загрузки или перетащите файлы</div>
+                            <div class="file-upload-hint">JPG, PNG, PDF, TXT до 10 MB (макс. 5 файлов)</div>
+                            <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf,.txt" style="display: none;">
+                        </div>
+                        <div class="file-list" id="fileList"></div>
+                        <div class="form-hint"><i class="fas fa-info-circle"></i> Максимум 5 файлов.</div>
                     </div>
                 </div>
 
-                <!-- 3. ВЫБОР ПРЕДМЕТА (ИСПРАВЛЕНО + ДРУГОЕ) -->
-                <div class="form-section">
-                    <div class="form-label">
-                        <i class="fas fa-book"></i>
-                        Предмет
-                        <span class="form-required">*</span>
-                    </div>
-                    
-                    <div class="subject-grid">
-                        <div class="subject-card active" data-subject="programming">
-                            <div class="subject-icon">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Программирование</div>
-                                <div class="subject-count">2 341</div>
-                            </div>
-                        </div>
-                        <div class="subject-card" data-subject="math">
-                            <div class="subject-icon">
-                                <i class="fas fa-square-root-alt"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Математика</div>
-                                <div class="subject-count">1 892</div>
-                            </div>
-                        </div>
-                        <div class="subject-card" data-subject="physics">
-                            <div class="subject-icon">
-                                <i class="fas fa-atom"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Физика</div>
-                                <div class="subject-count">1 234</div>
-                            </div>
-                        </div>
-                        <div class="subject-card" data-subject="chemistry">
-                            <div class="subject-icon">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Химия</div>
-                                <div class="subject-count">876</div>
-                            </div>
-                        </div>
-                        <div class="subject-card" data-subject="biology">
-                            <div class="subject-icon">
-                                <i class="fas fa-dna"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Биология</div>
-                                <div class="subject-count">654</div>
-                            </div>
-                        </div>
-                        <div class="subject-card" data-subject="economics">
-                            <div class="subject-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Экономика</div>
-                                <div class="subject-count">432</div>
-                            </div>
-                        </div>
-                        <!-- ДРУГОЕ -->
-                        <div class="subject-card" data-subject="other">
-                            <div class="subject-icon">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </div>
-                            <div class="subject-info">
-                                <div class="subject-name">Другое</div>
-                                <div class="subject-count">—</div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="selectedSubject" value="programming">
-                </div>
-
-                <!-- 4. БЛОК КОДА -->
-                <div class="form-section">
-                    <div class="form-label">
-                        <i class="fas fa-code"></i>
-                        Блоки кода
-                    </div>
-                    
-                    <div id="codeBlocksContainer">
-                        <div class="code-block-section">
-                            <div class="code-header">
-                                <span class="code-title">
-                                    <i class="fas fa-terminal"></i>
-                                    Блок кода #1
-                                </span>
-                                <select class="code-lang-select">
-                                    <option value="javascript">JavaScript</option>
-                                    <option value="python" selected>Python</option>
-                                    <option value="java">Java</option>
-                                    <option value="cpp">C++</option>
-                                    <option value="csharp">C#</option>
-                                    <option value="php">PHP</option>
-                                    <option value="ruby">Ruby</option>
-                                    <option value="go">Go</option>
-                                    <option value="rust">Rust</option>
-                                    <option value="sql">SQL</option>
-                                    <option value="html">HTML/CSS</option>
-                                    <option value="other">Другой</option>
-                                </select>
-                            </div>
-                            <textarea 
-                                class="code-textarea" 
-                                placeholder="Вставьте ваш код здесь..."
-                            >def quick_sort(arr):
-    if len(arr) <= 1:
-        return arr
-    pivot = arr[len(arr) // 2]
-    left = [x for x in arr if x < pivot]
-    middle = [x for x in arr if x == pivot]
-    right = [x for x in arr if x > pivot]
-    return quick_sort(left) + middle + quick_sort(right)</textarea>
-                            <button type="button" class="add-code-btn" onclick="alert('Добавление нового блока кода (будет реализовано)')">
-                                <i class="fas fa-plus-circle"></i>
-                                Добавить ещё блок кода
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        Для вставки нескольких блоков используйте кнопку выше.
-                    </div>
-                </div>
-
-                <!-- 5. ПРИКРЕПЛЕНИЕ ФАЙЛОВ -->
-                <div class="form-section">
-                    <div class="form-label">
-                        <i class="fas fa-paperclip"></i>
-                        Прикреплённые файлы
-                    </div>
-                    
-                    <div class="file-upload-area" id="fileUploadArea">
-                        <div class="file-upload-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div class="file-upload-title">
-                            Нажмите для загрузки или перетащите файлы
-                        </div>
-                        <div class="file-upload-hint">
-                            JPG, PNG, PDF, TXT до 10 MB (макс. 3 файла)
-                        </div>
-                        <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf,.txt" style="display: none;">
-                    </div>
-
-                    <div class="file-list" id="fileList">
-                        <div class="file-item">
-                            <div class="file-info">
-                                <i class="fas fa-file-image file-icon"></i>
-                                <span class="file-name">screenshot_condition.png</span>
-                                <span class="file-size">1.2 MB</span>
-                            </div>
-                            <i class="fas fa-times file-remove" onclick="this.closest('.file-item').remove()"></i>
-                        </div>
-                        <div class="file-item">
-                            <div class="file-info">
-                                <i class="fas fa-file-pdf file-icon" style="color: #ef4444;"></i>
-                                <span class="file-name">lecture_notes.pdf</span>
-                                <span class="file-size">2.8 MB</span>
-                            </div>
-                            <i class="fas fa-times file-remove" onclick="this.closest('.file-item').remove()"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        Максимум 3 файла. Допустимые форматы: JPG, PNG, PDF, TXT.
-                    </div>
-                </div>
-
-                <!-- 6. ПОХОЖИЕ ВОПРОСЫ -->
-                <div class="form-section">
-                    <div class="similar-questions">
-                        <div class="similar-header">
-                            <i class="fas fa-lightbulb"></i>
-                            Похожие вопросы (возможно, ответ уже есть)
-                        </div>
-                        <div class="similar-list" id="similarQuestions">
-                            <a href="question.html?id=45" class="similar-item">
-                                <div class="similar-content">
-                                    <div class="similar-title">
-                                        Как реализовать быструю сортировку на Python?
-                                    </div>
-                                    <div class="similar-meta">
-                                        <span><i class="fas fa-check-circle" style="color: #16a34a;"></i> 3 ответа</span>
-                                        <span><i class="fas fa-thumbs-up"></i> 45</span>
-                                    </div>
-                                </div>
-                                <span class="similar-status">Есть решение</span>
-                            </a>
-                            <a href="question.html?id=78" class="similar-item">
-                                <div class="similar-content">
-                                    <div class="similar-title">
-                                        Сортировка слиянием vs быстрая сортировка: что быстрее?
-                                    </div>
-                                    <div class="similar-meta">
-                                        <span><i class="fas fa-comment"></i> 8 ответов</span>
-                                        <span><i class="fas fa-thumbs-up"></i> 123</span>
-                                    </div>
-                                </div>
-                                <span class="similar-status">Есть решение</span>
-                            </a>
-                            <a href="question.html?id=92" class="similar-item">
-                                <div class="similar-content">
-                                    <div class="similar-title">
-                                        Ошибка рекурсии в quick sort: maximum recursion depth
-                                    </div>
-                                    <div class="similar-meta">
-                                        <span><i class="fas fa-comment"></i> 2 ответа</span>
-                                        <span><i class="fas fa-thumbs-up"></i> 12</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 7. КНОПКИ -->
+                <!-- Кнопки -->
                 <div class="form-actions">
-                    <button type="button" class="btn btn-outline" onclick="window.location.href='feed.html'">
-                        <i class="fas fa-times"></i> Отмена
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-large">
-                        <i class="fas fa-paper-plane"></i> Опубликовать вопрос
-                    </button>
+                    <button type="button" class="btn btn-outline" id="cancelBtn"><i class="fas fa-times"></i> Отмена</button>
+                    <button type="submit" class="btn btn-primary btn-large" id="submitBtn"><i class="fas fa-paper-plane"></i> Опубликовать</button>
                 </div>
             </form>
         </div>
     </main>
 
-    <!-- ФУТЕР -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <a href="feed.html" class="footer-logo">StudentHub</a>
-                    <p class="footer-text">
-                        Платформа академической взаимопомощи студентов. 
-                        Объединяем знания, ускоряем обучение.
-                    </p>
-                </div>
-                <div class="footer-section">
-                    <h4 class="footer-heading">Навигация</h4>
-                    <div class="footer-links">
-                        <a href="feed.html"><i class="fas fa-chevron-right"></i> Лента вопросов</a>
-                        <a href="ask.html"><i class="fas fa-chevron-right"></i> Задать вопрос</a>
-                        <a href="#"><i class="fas fa-chevron-right"></i> Рейтинг пользователей</a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4 class="footer-heading">Ресурсы</h4>
-                    <div class="footer-links">
-                        <a href="#"><i class="fas fa-chevron-right"></i> Помощь и FAQ</a>
-                        <a href="#"><i class="fas fa-chevron-right"></i> Правила сообщества</a>
-                        <a href="#"><i class="fas fa-chevron-right"></i> О проекте</a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4 class="footer-heading">Контакты</h4>
-                    <div class="footer-links">
-                        <a href="#"><i class="fas fa-envelope"></i> support@studenthub.com</a>
-                        <a href="#"><i class="fas fa-globe"></i> studenthub.com</a>
-                        <div class="social-links">
-                            <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
-                            <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
-                            <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="copyright">
-                © 2025 StudentHub. Все права защищены. Проект разработан студентами для студентов.
-            </div>
-        </div>
-    </footer>
+    <footer class="footer"><div class="container"><!-- футер --></div></footer>
 
+    <div class="notification" id="notification"><i class="fas fa-check-circle"></i><span class="notification-message"></span></div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
-        // ВЫБОР ПРЕДМЕТА
-        document.querySelectorAll('.subject-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('selectedSubject').value = this.dataset.subject;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация Quill
+            var quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: { toolbar: '#toolbar' },
+                placeholder: 'Опишите вашу проблему подробно...'
             });
-        });
 
-        // ЗАГРУЗКА ФАЙЛОВ
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const fileInput = document.getElementById('fileInput');
+            // Универсальная функция для сворачиваемых секций
+            function initCollapsible(headerId, contentId, defaultCollapsed = true) {
+                const header = document.getElementById(headerId);
+                const content = document.getElementById(contentId);
+                if (!header || !content) return;
 
-        fileUploadArea.addEventListener('click', () => fileInput.click());
+                const arrowIcon = header.querySelector('.fa-chevron-down');
+                const breakpoint = 480; // порог для мобильных
 
-        fileUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.borderColor = '#3b82f6';
-            fileUploadArea.style.background = '#eff6ff';
-        });
+                function updateState() {
+                    const isMobile = window.innerWidth <= breakpoint;
+                    if (isMobile && defaultCollapsed) {
+                        content.classList.add('collapsed');
+                        if (arrowIcon) arrowIcon.style.transform = 'rotate(-90deg)';
+                        header.setAttribute('aria-expanded', 'false');
+                    } else {
+                        content.classList.remove('collapsed');
+                        if (arrowIcon) arrowIcon.style.transform = 'rotate(0deg)';
+                        header.setAttribute('aria-expanded', 'true');
+                    }
+                }
 
-        fileUploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.borderColor = '#e2e8f0';
-            fileUploadArea.style.background = '#f8fafc';
-        });
+                updateState();
 
-        fileUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.borderColor = '#e2e8f0';
-            fileUploadArea.style.background = '#f8fafc';
-            alert('Файлы загружены (демо-режим)');
-        });
+                function toggleHandler(event) {
+                    event.preventDefault();
+                    content.classList.toggle('collapsed');
+                    const isCollapsed = content.classList.contains('collapsed');
+                    if (arrowIcon) {
+                        arrowIcon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                    }
+                    header.setAttribute('aria-expanded', !isCollapsed);
+                }
 
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                alert(`Выбрано файлов: ${this.files.length}\n(Будет реализовано с бэкендом)`);
-            }
-        });
+                header.addEventListener('click', toggleHandler);
+                header.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleHandler(e);
+                    }
+                });
 
-        // ПОХОЖИЕ ВОПРОСЫ (ЗАГЛУШКА)
-        const titleInput = document.getElementById('questionTitle');
-        const bodyInput = document.getElementById('questionBody');
-
-        function updateSimilarQuestions() {
-            const title = titleInput.value.trim();
-            const body = bodyInput.value.trim();
-            
-            if (title.length > 3 || body.length > 10) {
-                // Здесь будет API запрос
-            }
-        }
-
-        titleInput.addEventListener('input', updateSimilarQuestions);
-        bodyInput.addEventListener('input', updateSimilarQuestions);
-
-        // ОТПРАВКА ФОРМЫ
-        document.getElementById('askForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = titleInput.value.trim();
-            const body = bodyInput.value.trim();
-            const subject = document.getElementById('selectedSubject').value;
-
-            if (!title) {
-                alert('Пожалуйста, введите заголовок вопроса');
-                return;
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        requestAnimationFrame(updateState);
+                    }, 150);
+                });
             }
 
-            if (!body) {
-                alert('Пожалуйста, опишите ваш вопрос');
-                return;
+            initCollapsible('subjectHeader', 'subjectContent', true);
+            initCollapsible('filesHeader', 'filesContent', true);
+
+            // Выбор темы
+            const subjectCards = document.querySelectorAll('.subject-card');
+            const selectedSubject = document.getElementById('selectedSubject');
+            const customSubjectField = document.getElementById('customSubjectField');
+            const customSubjectInput = document.getElementById('customSubject');
+
+            subjectCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    subjectCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    const subject = this.dataset.subject;
+                    selectedSubject.value = subject;
+
+                    if (subject === 'other') {
+                        customSubjectField.classList.add('visible');
+                        customSubjectInput.setAttribute('required', 'required');
+                    } else {
+                        customSubjectField.classList.remove('visible');
+                        customSubjectInput.removeAttribute('required');
+                        customSubjectInput.value = '';
+                    }
+                });
+            });
+
+            // Файлы
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const MAX_FILES = 5;
+            const MAX_SIZE = 10 * 1024 * 1024;
+
+            fileUploadArea.addEventListener('click', () => fileInput.click());
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = '#3b82f6';
+                fileUploadArea.style.background = '#eff6ff';
+            });
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.style.borderColor = '#e2e8f0';
+                fileUploadArea.style.background = '#f8fafc';
+            });
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = '#e2e8f0';
+                fileUploadArea.style.background = '#f8fafc';
+                handleFiles(Array.from(e.dataTransfer.files));
+            });
+            fileInput.addEventListener('change', function() {
+                handleFiles(Array.from(this.files));
+                this.value = '';
+            });
+
+            function handleFiles(files) {
+                const current = fileList.children.length;
+                const available = MAX_FILES - current;
+                if (available <= 0) {
+                    showNotification(`Можно прикрепить не более ${MAX_FILES} файлов`, 'error');
+                    return;
+                }
+                files.slice(0, available).forEach(file => {
+                    if (file.size > MAX_SIZE) {
+                        showNotification(`Файл ${file.name} превышает 10 МБ`, 'error');
+                        return;
+                    }
+                    const size = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+                    let type = 'image';
+                    if (file.type.includes('pdf')) type = 'pdf';
+                    else if (file.type.includes('text')) type = 'txt';
+                    addFileToList(file.name, size, type);
+                });
+                if (files.length > available) {
+                    showNotification(`Добавлено только первые ${available} файлов`, 'warning');
+                }
             }
 
-            alert(`Вопрос отправлен на модерацию!\n\nЗаголовок: ${title}\nПредмет: ${subject}\n\n(Будет реализовано с бэкендом)`);
-            
-            setTimeout(() => {
-                window.location.href = 'feed.html';
-            }, 1000);
-        });
+            function addFileToList(name, size, type) {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                let icon = 'fa-file-image';
+                if (type === 'pdf') icon = 'fa-file-pdf';
+                else if (type === 'txt') icon = 'fa-file-alt';
+                item.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas ${icon} file-icon" style="${type === 'pdf' ? 'color:#ef4444;' : ''}"></i>
+                        <span class="file-name">${name}</span>
+                        <span class="file-size">${size}</span>
+                    </div>
+                    <i class="fas fa-times file-remove"></i>
+                `;
+                item.querySelector('.file-remove').addEventListener('click', () => item.remove());
+                fileList.appendChild(item);
+            }
 
-        // АНИМАЦИЯ КНОПОК
-        document.querySelectorAll('.btn, .subject-card').forEach(el => {
-            el.addEventListener('click', function(e) {
-                if (!this.classList.contains('subject-card')) {
-                    this.style.transform = 'scale(0.96)';
-                    setTimeout(() => this.style.transform = '', 150);
+            // Уведомления
+            const notification = document.getElementById('notification');
+            let notificationTimeout;
+            window.showNotification = function(message, type = 'success') {
+                notification.className = `notification ${type} show`;
+                notification.querySelector('.notification-message').textContent = message;
+                if (type === 'success') notification.querySelector('i').className = 'fas fa-check-circle';
+                else if (type === 'error') notification.querySelector('i').className = 'fas fa-exclamation-circle';
+                else if (type === 'warning') notification.querySelector('i').className = 'fas fa-exclamation-triangle';
+                clearTimeout(notificationTimeout);
+                notificationTimeout = setTimeout(() => notification.classList.remove('show'), 4000);
+            };
+
+            // Отправка формы
+            const askForm = document.getElementById('askForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const titleInput = document.getElementById('questionTitle');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            cancelBtn.addEventListener('click', () => {
+                if (confirm('Вы уверены, что хотите отменить создание вопроса?')) {
+                    window.location.href = 'feed.html';
                 }
             });
+
+            askForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const title = titleInput.value.trim();
+                const body = quill.root.innerHTML;
+                const subject = selectedSubject.value;
+                let isValid = true;
+
+                if (!title) {
+                    titleInput.classList.add('error');
+                    isValid = false;
+                } else {
+                    titleInput.classList.remove('error');
+                }
+
+                if (!body || body === '<p><br></p>') {
+                    showNotification('Заполните текст вопроса', 'error');
+                    isValid = false;
+                }
+
+                if (subject === 'other') {
+                    const custom = customSubjectInput.value.trim();
+                    if (!custom) {
+                        customSubjectInput.classList.add('error');
+                        showNotification('Введите название своей темы', 'error');
+                        isValid = false;
+                    } else {
+                        customSubjectInput.classList.remove('error');
+                    }
+                }
+
+                if (!isValid) return;
+
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner"></span> Публикация...';
+
+                // Имитация отправки
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    showNotification('Вопрос отправлен на модерацию!', 'success');
+                    setTimeout(() => window.location.href = 'feed.html', 1500);
+                }, 1500);
+            });
+
+            // Анимация клика (необязательно)
+            document.querySelectorAll('.btn, .subject-card').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    if (!this.classList.contains('subject-card')) {
+                        this.style.transform = 'scale(0.96)';
+                        setTimeout(() => this.style.transform = '', 150);
+                    }
+                });
+            });
+
+            // ==================== БУРГЕР-МЕНЮ (из feed.html) ====================
+            const burgerBtn = document.getElementById('burgerBtn');
+            const navMenu = document.getElementById('navMenu');
+
+            if (burgerBtn && navMenu) {
+                burgerBtn.addEventListener('click', () => {
+                    burgerBtn.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!navMenu.contains(e.target) && !burgerBtn.contains(e.target) && navMenu.classList.contains('active')) {
+                        burgerBtn.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                });
+            }
         });
     </script>
 </body>
