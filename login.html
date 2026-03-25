@@ -619,6 +619,8 @@
         </div>
     </footer>
 
+    <!-- Подключаем общий модуль авторизации -->
+    <script src="js/auth.js"></script>
     <script>
         // ===== ПОКАЗ/СКРЫТИЕ ПАРОЛЯ =====
         const togglePassword = document.getElementById('togglePassword');
@@ -660,13 +662,7 @@
         setupIconHandlers(usernameInput, userIcon);
         setupIconHandlers(passwordInput, lockIcon);
 
-        // ===== ОБРАБОТКА ОТПРАВКИ ФОРМЫ (ДЕМО) =====
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Демо-режим: вход выполнен!');
-        });
-
-        // ===== АНИМАЦИЯ КНОПОК (БЕЗ БЛОКИРОВКИ ССЫЛОК) =====
+        // ===== АНИМАЦИЯ КНОПОК =====
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 this.style.transform = 'scale(0.96)';
@@ -688,26 +684,63 @@
             });
         });
 
-        // ===== ДЕМО ДЛЯ СОЦИАЛЬНЫХ КНОПОК =====
-        document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (this.getAttribute('href') === '#') {
-                    e.preventDefault();
-                    let service = '';
-                    const icon = this.querySelector('i');
-                    if (icon.classList.contains('fa-google')) service = 'Google';
-                    else if (icon.classList.contains('fa-github')) service = 'GitHub';
-                    else if (icon.classList.contains('fa-telegram')) service = 'Telegram';
-                    else if (icon.classList.contains('fa-vk')) service = 'VK';
-                    alert(`Демо-вход через ${service}`);
-                }
-            });
-        });
-
         // Инициализация иконок при загрузке
         window.addEventListener('load', function() {
             if (usernameInput.value.trim() !== '') userIcon.classList.add('active-icon');
             if (passwordInput.value.trim() !== '') lockIcon.classList.add('active-icon');
+        });
+
+        // Обработка формы входа
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            // Блокируем кнопку на время запроса
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Сохраняем токен и данные пользователя
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('auth_user', JSON.stringify(data.user));
+
+                    // Показываем уведомление и перенаправляем
+                    alert('✅ Вход выполнен успешно!\n\nДобро пожаловать, ' + (data.user.username || data.user.email) + '!');
+                    
+                    // Перенаправляем на главную страницу
+                    setTimeout(() => {
+                        window.location.href = 'feed.html';
+                    }, 500);
+                } else {
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+                    
+                    alert('❌ Ошибка входа:\n\n' + (data.error || 'Неверные учетные данные'));
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                
+                // Восстанавливаем кнопку
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+                
+                alert('❌ Ошибка соединения с сервером.\n\nУбедитесь, что сервер запущен на http://localhost:3000');
+            }
         });
     </script>
 </body>

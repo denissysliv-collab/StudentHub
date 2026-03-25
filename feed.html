@@ -52,6 +52,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
+            gap: 16px;
         }
 
         .logo {
@@ -188,25 +189,28 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            background-color: white;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            box-shadow: none;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            background-color: #fee2e2;
+            border-color: #dc2626;
+            color: #dc2626;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            box-shadow: none;
         }
 
         .btn-outline {
             background-color: transparent;
-            color: #3b82f6;
-            border: 2px solid #3b82f6;
+            color: #0051ff;
+            border: 2px solid #0051ff;
         }
 
         .btn-outline:hover {
-            background-color: #eff6ff;
+            background-color: #fee2e2;
             transform: translateY(-2px);
         }
 
@@ -250,7 +254,7 @@
         /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
         .main-content {
             flex: 1 0 auto;
-            padding-top: 90px;
+            padding-top: 100px;
             padding-bottom: 40px;
             width: 100%;
         }
@@ -951,68 +955,147 @@
 
             .burger-btn {
                 display: flex;
+                order: 3;
             }
 
             .nav-menu {
                 position: fixed;
                 top: 70px;
-                left: 0;
                 right: 0;
+                width: 280px;
+                max-width: 80vw;
+                /* height: calc(100vh - 70px); */
+                
                 background: white;
                 flex-direction: column;
-                align-items: stretch;
-                padding: 20px;
+                align-items: flex-start;
+                padding: 24px;
                 gap: 20px;
-                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-                transform: translateY(-150%);
-                transition: transform 0.3s ease;
+                box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s ease, visibility 0.3s ease, opacity 0.3s ease;
                 z-index: 900;
-                border-radius: 0 0 24px 24px;
+                border-radius: 0 0 0 16px;
+                overflow-y: auto;
+                display: flex;
+                visibility: hidden;
+                opacity: 0;
             }
 
             .nav-menu.active {
-                transform: translateY(0);
+                transform: translateX(0);
+                visibility: visible;
+                opacity: 1;
             }
 
             .nav-search {
-                max-width: 100%;
+                order: 2;
+                flex: 1;
+                max-width: none;
                 margin: 0;
+            }
+
+            /* Аватар профиля - в самом верху */
+            .nav-avatar {
+                order: -1;
+                align-self: flex-start;
+                justify-content: flex-start;
+                margin: 0 0 16px 0;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Кнопка Профиль - белый фон, красная обводка */
+            #navProfileBtn {
+                background-color: white !important;
+                color: #0051ff !important;
+                border: 2px solid #0051ff !important;
+                order: -1;
+                margin-bottom: 12px;
+            }
+
+            #navProfileBtn:hover {
+                background-color: #fee2e2 !important;
+                border-color: #0051ff !important;
+                color: #0051ff !important;
             }
 
             .nav-user-menu {
                 width: 100%;
-                justify-content: center;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 0;
+                padding-top: 0;
+                border-top: none;
             }
 
             .nav-user-menu .btn-sm {
                 padding: 12px 24px;
                 font-size: 16px;
                 width: 100%;
+                justify-content: center;
+            }
+
+            /* Кнопка Задать вопрос - белый фон, красная обводка */
+            .nav-user-menu .btn-primary {
+                background-color: white !important;
+                color: #0051ff !important;
+                border: 2px solid #0051ff !important;
+            }
+
+            .nav-user-menu .btn-primary:hover {
+                background-color: #fee2e2 !important;
+                border-color: #0051ff !important;
+                color: #0051ff !important;
+            }
+
+            /* Кнопка выхода - белый фон, красная обводка */
+            #logoutBtn {
+                background-color: white !important;
+                color: #ef4444 !important;
+                border: 2px solid #ef4444 !important;
+            }
+
+            #logoutBtn:hover {
+                background-color: #fee2e2 !important;
+                border-color: #dc2626 !important;
+                color: #dc2626 !important;
             }
 
             .main-content {
-                padding-top: 70px;
+                padding-top: 90px;
             }
 
             .tabs-wrapper {
-                top: 60px;
+                top: 70px;
             }
 
             .scroll-to-top-questions {
                 bottom: 20px;
                 right: 20px;
-                width: 44px; /* уменьшена на ~20% */
+                width: 44px;
                 height: 44px;
                 font-size: 22px;
             }
 
-            /* Скрываем текст логотипа на мобильных */
             .logo-text {
                 display: none;
             }
+            
+            .logo-icon {
+                font-size: 24px;
+            }
+           
         }
 
         @media (max-width: 480px) {
+            .main-content {
+                padding-top: 90px;
+            }
+            
             .feed-tabs {
                 flex-wrap: wrap;
             }
@@ -1048,6 +1131,14 @@
                 padding: 14px 20px;
             }
         }
+        @media (max-width: 768px) {
+    .main-content {
+        padding-top: 20px;
+    }
+}
+        
+   
+
     </style>
 </head>
 <body>
@@ -1071,13 +1162,17 @@
 
                 <div class="nav-menu" id="navMenu">
                     <div class="nav-user-menu">
+                        <!-- Кнопка Профиль в самом верху -->
+                        <a href="profile.html" class="btn btn-outline btn-sm" id="navProfileBtn" style="display: none;">
+                            <i class="fas fa-user"></i> Профиль
+                        </a>
                         <a href="ask.html" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus"></i> Задать вопрос
                         </a>
+                        <button class="btn btn-outline btn-sm" id="logoutBtn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i> Выход
+                        </button>
                     </div>
-                    <a href="profile.html" class="nav-avatar">
-                        <span>А</span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -1370,53 +1465,155 @@
     </button>
 
     <script>
+        // ==================== ПРОВЕРКА АУТЕНТИФИКАЦИИ ====================
+        function checkAuth() {
+            const userStr = localStorage.getItem('auth_user');
+            const token = localStorage.getItem('auth_token');
+            const navProfileBtn = document.getElementById('navProfileBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (userStr && token) {
+                const user = JSON.parse(userStr);
+
+                // Показываем кнопку профиля
+                if (navProfileBtn) {
+                    navProfileBtn.style.display = 'inline-flex';
+                }
+
+                // Показываем кнопку выхода
+                if (logoutBtn) {
+                    logoutBtn.style.display = 'inline-flex';
+                    logoutBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (confirm('Вы действительно хотите выйти из аккаунта?')) {
+                            localStorage.removeItem('auth_token');
+                            localStorage.removeItem('auth_user');
+                            alert('Вы успешно вышли из системы');
+                            window.location.href = 'login.html';
+                        }
+                    };
+                }
+            } else {
+                // Скрываем кнопку профиля если не авторизован
+                if (navProfileBtn) {
+                    navProfileBtn.style.display = 'none';
+                }
+            }
+        }
+        
+        // Вызываем проверку при загрузке
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
         // Бесконечный скролл удалён, оставлены только функции для демонстрации смены табов
 
         // ==================== БУРГЕР-МЕНЮ ====================
-        const burgerBtn = document.getElementById('burgerBtn');
-        const navMenu = document.getElementById('navMenu');
-
-        if (burgerBtn && navMenu) {
-            burgerBtn.addEventListener('click', () => {
-                burgerBtn.classList.toggle('active');
-                navMenu.classList.toggle('active');
+        function initBurgerMenu() {
+            const burgerBtn = document.getElementById('burgerBtn');
+            const navMenu = document.getElementById('navMenu');
+            
+            console.log('🔍 Burger menu init:', { 
+                burgerBtn: burgerBtn ? 'FOUND ✓' : 'NOT FOUND ✗',
+                navMenu: navMenu ? 'FOUND ✓' : 'NOT FOUND ✗'
             });
 
-            document.addEventListener('click', (e) => {
-                if (!navMenu.contains(e.target) && !burgerBtn.contains(e.target) && navMenu.classList.contains('active')) {
-                    burgerBtn.classList.remove('active');
-                    navMenu.classList.remove('active');
-                }
-            });
-        }
-
-        // ==================== ФИЛЬТРЫ НА МОБИЛЬНЫХ ====================
-        const filterIcon = document.getElementById('filterIcon');
-        const filterSidebar = document.getElementById('filterSidebar');
-        const closeFiltersBtn = document.getElementById('closeFiltersBtn');
-        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
-
-        function closeFilters() {
-            filterSidebar.classList.remove('active');
-        }
-
-        function openFilters() {
-            filterSidebar.classList.add('active');
-        }
-
-        if (filterIcon && filterSidebar) {
-            filterIcon.addEventListener('click', openFilters);
-
-            if (closeFiltersBtn) {
-                closeFiltersBtn.addEventListener('click', closeFilters);
+            if (!burgerBtn || !navMenu) {
+                console.error('❌ Burger menu elements NOT FOUND!');
+                return;
             }
 
-            document.addEventListener('click', (e) => {
-                if (!filterSidebar.contains(e.target) && !filterIcon.contains(e.target) && filterSidebar.classList.contains('active')) {
-                    closeFilters();
+            // Скрываем меню по умолчанию
+            navMenu.classList.remove('active');
+            burgerBtn.classList.remove('active');
+            
+            console.log('📋 Initial menu state:', {
+                classes: navMenu.classList.toString(),
+                display: window.getComputedStyle(navMenu).display,
+                transform: window.getComputedStyle(navMenu).transform,
+                visibility: window.getComputedStyle(navMenu).visibility,
+                opacity: window.getComputedStyle(navMenu).opacity
+            });
+            
+            // Обработчик клика на бургер
+            burgerBtn.onclick = function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                const isActive = navMenu.classList.toggle('active');
+                console.log('🍔 Burger clicked! Menu:', isActive ? 'OPEN ✓' : 'CLOSED ✗');
+                console.log('🍔 Menu classes:', navMenu.classList.toString());
+                console.log('🍔 Menu state after toggle:', {
+                    display: window.getComputedStyle(navMenu).display,
+                    transform: window.getComputedStyle(navMenu).transform,
+                    visibility: window.getComputedStyle(navMenu).visibility,
+                    opacity: window.getComputedStyle(navMenu).opacity
+                });
+            };
+            
+            // Закрытие меню при клике вне его области
+            document.addEventListener('click', function(e) {
+                if (navMenu.classList.contains('active') && 
+                    !navMenu.contains(e.target) && 
+                    !burgerBtn.contains(e.target)) {
+                    console.log('🚪 Closing menu (click outside)');
+                    navMenu.classList.remove('active');
+                    burgerBtn.classList.remove('active');
                 }
             });
+            
+            console.log('✅ Burger menu handler attached successfully!');
+        }
+        
+        // Запускаем сразу
+        initBurgerMenu();
+
+        // ==================== ФИЛЬТРЫ НА МОБИЛЬНЫХ ====================
+        function initFilters() {
+            const filterIcon = document.getElementById('filterIcon');
+            const filterSidebar = document.getElementById('filterSidebar');
+            const closeFiltersBtn = document.getElementById('closeFiltersBtn');
+            const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+            
+            console.log('🔍 Filters init:', { filterIcon, filterSidebar, closeFiltersBtn, applyFiltersBtn });
+
+            function closeFilters() {
+                filterSidebar.classList.remove('active');
+            }
+
+            function openFilters() {
+                filterSidebar.classList.add('active');
+            }
+
+            if (filterIcon && filterSidebar) {
+                filterIcon.addEventListener('click', openFilters);
+                console.log('✅ Filter icon click handler added');
+
+                if (closeFiltersBtn) {
+                    closeFiltersBtn.addEventListener('click', closeFilters);
+                    console.log('✅ Close filters handler added');
+                }
+
+                if (applyFiltersBtn) {
+                    applyFiltersBtn.addEventListener('click', () => {
+                        console.log('✅ Apply filters clicked');
+                        closeFilters();
+                    });
+                }
+
+                document.addEventListener('click', (e) => {
+                    if (filterSidebar.classList.contains('active') &&
+                        !filterSidebar.contains(e.target) && 
+                        !filterIcon.contains(e.target)) {
+                        console.log('🚪 Closing filters sidebar');
+                        closeFilters();
+                    }
+                });
+            } else {
+                console.error('❌ Filter elements NOT FOUND!', { 
+                    filterIcon: !!filterIcon, 
+                    filterSidebar: !!filterSidebar 
+                });
+            }
         }
 
         // ==================== ФУНКЦИИ СБРОСА ФИЛЬТРОВ ====================
@@ -1510,24 +1707,122 @@
         function loadNewQuestions() {
             const questionsFeed = document.getElementById('questionsFeed');
             // Очищаем ленту
+            questionsFeed.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> Загрузка вопросов...</div>';
+            
+            // Загружаем вопросы из API
+            fetch('http://localhost:3000/api/questions?limit=10')
+                .then(response => response.json())
+                .then(data => {
+                    displayQuestions(data.data || []);
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки вопросов:', error);
+                    questionsFeed.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Ошибка загрузки вопросов</p></div>';
+                });
+        }
+        
+        // ==================== ЗАГРУЗКА ВОПРОСОВ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ====================
+        function loadQuestions() {
+            const questionsFeed = document.getElementById('questionsFeed');
+            questionsFeed.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> Загрузка вопросов...</div>';
+            
+            // Загружаем вопросы из API
+            fetch('http://localhost:3000/api/questions?limit=20')
+                .then(response => response.json())
+                .then(data => {
+                    displayQuestions(data.data || []);
+                    document.getElementById('totalQuestions').textContent = data.pagination?.total || data.data?.length || 0;
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки вопросов:', error);
+                    questionsFeed.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Ошибка загрузки вопросов. Убедитесь, что сервер запущен.</p></div>';
+                });
+        }
+        
+        // ==================== ОТОБРАЖЕНИЕ ВОПРОСОВ ====================
+        function displayQuestions(questions) {
+            const questionsFeed = document.getElementById('questionsFeed');
             questionsFeed.innerHTML = '';
-            // Создаём новые карточки (для демо)
-            const newCard1 = createDemoCard('Программирование', 'Как работает хуки в React?', 'Анна Смирнова', '★ 78', 'fas fa-code', 120, 5, 12, true);
-            const newCard2 = createDemoCard('Физика', 'Задача по термодинамике', 'Иван Петров', '★ 34', 'fas fa-atom', 45, 2, 3, false);
-            const newCard3 = createDemoCard('Математика', 'Интегралы с параметром', 'Ольга Васильева', '★ 56', 'fas fa-square-root-alt', 89, 4, 7, false);
-            const newCard4 = createDemoCard('Химия', 'Окисление этанола', 'Светлана Михайлова', '★ 42', 'fas fa-flask', 89, 4, 7, false);
-            const newCard5 = createDemoCard('Физика', 'Второй закон Ньютона', 'Иван Соколов', '★ 28', 'fas fa-atom', 34, 2, 5, false);
-            const newCard6 = createDemoCard('Биология', 'Фотосинтез', 'Анна Васильева', '★ 17', 'fas fa-dna', 22, 1, 3, false);
-            questionsFeed.appendChild(newCard1);
-            questionsFeed.appendChild(newCard2);
-            questionsFeed.appendChild(newCard3);
-            questionsFeed.appendChild(newCard4);
-            questionsFeed.appendChild(newCard5);
-            questionsFeed.appendChild(newCard6);
-            // Добавляем в наблюдатель
-            [newCard1, newCard2, newCard3, newCard4, newCard5, newCard6].forEach(card => observer.observe(card));
-            // Обновляем счётчик (для демо)
-            document.getElementById('totalQuestions').textContent = '6';
+
+            if (questions.length === 0) {
+                questionsFeed.innerHTML = '<div class="empty-state"><i class="fas fa-question-circle"></i><p>Пока нет вопросов. Будьте первым!</p><a href="ask.html" class="btn btn-primary" style="margin-top: 20px;"><i class="fas fa-plus"></i> Задать вопрос</a></div>';
+                return;
+            }
+
+            questions.forEach(question => {
+                const questionCard = document.createElement('a');
+                questionCard.href = `question.html?id=${question.id}`;
+                questionCard.className = 'question-card';
+
+                // Определяем иконку в зависимости от тегов
+                let iconClass = 'fas fa-question-circle';
+                if (question.tags && question.tags.length > 0) {
+                    const firstTag = question.tags[0].toLowerCase();
+                    if (firstTag.includes('программ') || firstTag.includes('код')) {
+                        iconClass = 'fas fa-code';
+                    } else if (firstTag.includes('матем') || firstTag.includes('алгебр') || firstTag.includes('геометр')) {
+                        iconClass = 'fas fa-square-root-alt';
+                    } else if (firstTag.includes('физик')) {
+                        iconClass = 'fas fa-atom';
+                    } else if (firstTag.includes('хими')) {
+                        iconClass = 'fas fa-flask';
+                    } else if (firstTag.includes('биолог')) {
+                        iconClass = 'fas fa-dna';
+                    } else if (firstTag.includes('истор')) {
+                        iconClass = 'fas fa-book';
+                    } else if (firstTag.includes('литератур')) {
+                        iconClass = 'fas fa-book-open';
+                    }
+                }
+
+                // Ограничиваем длину контента для превью
+                const previewText = question.content && question.content.length > 150 ?
+                    question.content.substring(0, 150) + '...' :
+                    (question.content || '');
+
+                // Форматируем дату
+                const createdDate = question.created_at ? new Date(question.created_at).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }) : 'неизвестно';
+
+                questionCard.innerHTML = `
+                    <div class="question-header">
+                        <span class="subject-badge"><i class="${iconClass}"></i> ${question.tags && question.tags.length > 0 ? question.tags[0] : 'Общий'}</span>
+                    </div>
+                    <h2 class="question-title">${question.title}</h2>
+                    ${previewText ? `<div class="question-preview">${previewText}</div>` : ''}
+                    <div class="question-meta">
+                        <div class="author-info">
+                            <div class="author-avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${(question.author || 'A')[0].toUpperCase()}</div>
+                            <span>${question.author || 'Аноним'}</span>
+                            <span style="color: #94a3b8;">·</span>
+                            <span style="color: #64748b;">${createdDate}</span>
+                        </div>
+                    </div>
+                    <div class="question-stats">
+                        <span class="stat-item"><i class="fas fa-comment"></i> ${question.answers_count || 0}</span>
+                        <span class="stat-item"><i class="fas fa-thumbs-up"></i> ${question.votes_count || 0}</span>
+                        <span class="stat-item"><i class="fas fa-eye"></i> ${question.views_count || 0}</span>
+                    </div>
+                `;
+
+                questionsFeed.appendChild(questionCard);
+            });
+            
+            // Обновляем наблюдателя для анимации
+            const cards = document.querySelectorAll('.question-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
+
+            cards.forEach(card => observer.observe(card));
         }
 
         function createDemoCard(subject, title, author, reputation, iconClass, views, comments, likes, solved) {
@@ -1612,15 +1907,38 @@ function showSkeletonCards(count = 6) {
     }
 }
 
-// Обновим loadNewQuestions
-function loadNewQuestions() {
-    showSkeletonCards(6); // показываем скелетоны
-    setTimeout(() => { // имитация загрузки
-        const questionsFeed = document.getElementById('questionsFeed');
-        questionsFeed.innerHTML = ''; // очищаем скелетоны
-        // ... создаём реальные карточки как раньше
-    }, 800); // задержка для демонстрации
+// Функция для форматирования даты
+function formatDate(dateString) {
+   const date = new Date(dateString);
+   const now = new Date();
+   const diffMs = now - date;
+   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+   const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+   if (diffMinutes < 1) {
+       return 'только что';
+   } else if (diffHours < 1) {
+       return `${diffMinutes} мин. назад`;
+   } else if (diffDays < 1) {
+       return `${diffHours} ч. назад`;
+   } else if (diffDays < 7) {
+       return `${diffDays} дн. назад`;
+   } else {
+       return date.toLocaleDateString('ru-RU');
+   }
 }
-    </script>
+
+// Загружаем вопросы при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+   loadQuestions();
+   // Принудительная инициализация бургер-меню и фильтров
+   setTimeout(() => {
+       initBurgerMenu();
+       initFilters();
+   }, 100);
+});
+
+   </script>
 </body>
 </html>

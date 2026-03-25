@@ -992,7 +992,7 @@
 
                 <!-- Кнопки отправки -->
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Опубликовать</button>
+                    <button class="btn btn-primary" id="publishAnswerBtn"><i class="fas fa-paper-plane"></i> Опубликовать</button>
                     <button class="btn btn-outline"><i class="fas fa-save"></i> Черновик</button>
                 </div>
             </div>
@@ -1558,6 +1558,197 @@
             });
 
             // Также можно применить размер по умолчанию при фокусе?
+            
+            // ============================================
+            // ПРОВЕРКА АВТОРИЗАЦИИ ДЛЯ ОПУБЛИКОВАНИЯ ОТВЕТА
+            // ============================================
+            const publishAnswerBtn = document.getElementById('publishAnswerBtn');
+            const answerEditor = document.getElementById('answerEditor');
+            
+            if (publishAnswerBtn) {
+                publishAnswerBtn.addEventListener('click', async () => {
+                    // Проверка авторизации
+                    const token = localStorage.getItem('auth_token');
+                    const user = localStorage.getItem('auth_user');
+                    
+                    if (!token || !user) {
+                        alert('⚠️ Для публикации ответа необходимо войти в систему!\n\nСейчас вы будете перенаправлены на страницу входа.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    const content = answerEditor.innerHTML.trim();
+                    if (!content || content === '<br>') {
+                        alert('⚠️ Введите текст ответа!');
+                        answerEditor.focus();
+                        return;
+                    }
+                    
+                    // Получаем ID вопроса из URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const questionId = urlParams.get('id');
+                    
+                    if (!questionId) {
+                        alert('❌ Не удалось определить ID вопроса');
+                        return;
+                    }
+                    
+                    try {
+                        publishAnswerBtn.disabled = true;
+                        publishAnswerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Публикация...';
+                        
+                        const response = await fetch('http://localhost:3000/api/questions/' + questionId + '/answers', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                content: content
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            alert('✅ Ответ успешно опубликован!');
+                            answerEditor.innerHTML = '';
+                            // Здесь можно добавить перезагрузку страницы или добавление ответа в DOM
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            alert('❌ Ошибка: ' + (data.error || 'Не удалось опубликовать ответ'));
+                            publishAnswerBtn.disabled = false;
+                            publishAnswerBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Опубликовать';
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        alert('❌ Ошибка соединения с сервером');
+                        publishAnswerBtn.disabled = false;
+                        publishAnswerBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Опубликовать';
+                    }
+                });
+            }
+            
+            // ============================================
+            // ЗАГРУЗКА ВОПРОСА И ОТВЕТОВ ИЗ API
+            // ============================================
+            function loadQuestionAndAnswers() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const questionId = urlParams.get('id');
+                
+                if (!questionId) {
+                    alert('❌ Не указан ID вопроса');
+                    window.location.href = 'feed.html';
+                    return;
+                }
+                
+                // Загружаем вопрос
+                fetch('http://localhost:3000/api/questions/' + questionId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.question) {
+                            displayQuestion(data.question);
+                            // Загружаем ответы
+                            loadAnswers(questionId);
+                        } else {
+                            alert('❌ Вопрос не найден');
+                            window.location.href = 'feed.html';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки вопроса:', error);
+                        alert('❌ Ошибка загрузки вопроса');
+                    });
+            }
+            
+            function displayQuestion(question) {
+                // Обновляем заголовок страницы
+                document.title = 'StudentHub — ' + question.title;
+                
+                // Обновляем заголовок вопроса
+                const titleEl = document.querySelector('.question-title');
+                if (titleEl) titleEl.textContent = question.title;
+                
+                // Обновляем контент вопроса
+                const bodyEl = document.querySelector('.question-body');
+                if (bodyEl) bodyEl.innerHTML = question.content;
+                
+                // Обновляем информацию об авторе
+                const authorEl = document.querySelector('.author-name');
+                if (authorEl && question.author) authorEl.textContent = question.author;
+                
+                // Обновляем статистику
+                const viewsEl = document.querySelector('.stat-item .fa-eye');
+                if (viewsEl) viewsEl.parentElement.textContent = '👁 ' + (question.views_count || 0);
+                
+                const answersEl = document.querySelector('.stat-item .fa-comment');
+                if (answersEl) answersEl.parentElement.textContent = '💬 ' + (question.answers_count || 0);
+                
+                const votesEl = document.querySelector('.stat-item .fa-thumbs-up');
+                if (votesEl) votesEl.parentElement.textContent = '👍 ' + (question.votes_count || 0);
+            }
+            
+            function loadAnswers(questionId) {
+                fetch('http://localhost:3000/api/questions/' + questionId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.question && data.question.answers) {
+                            displayAnswers(data.question.answers);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки ответов:', error);
+                    });
+            }
+            
+            function displayAnswers(answers) {
+                const container = document.querySelector('.answers-container');
+                if (!container) return;
+                
+                if (answers.length === 0) {
+                    container.innerHTML = '<div class="empty-state" style="padding: 40px; text-align: center;"><i class="fas fa-comments" style="font-size: 48px; opacity: 0.5;"></i><p>Пока нет ответов. Будьте первым!</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                answers.forEach(answer => {
+                    const answerCard = document.createElement('div');
+                    answerCard.className = 'answer-card';
+                    
+                    const answerDate = answer.created_at ? new Date(answer.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : 'неизвестно';
+                    
+                    answerCard.innerHTML = `
+                        <div class="answer-header">
+                            <div class="answer-author">
+                                <div class="answer-avatar" style="background: linear-gradient(135deg, #10b981, #34d399);">${(answer.author || 'A')[0].toUpperCase()}</div>
+                                <div class="answer-meta">
+                                    <span class="answer-name">${answer.author || 'Аноним'}</span>
+                                    <span class="answer-date">${answerDate}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="answer-body">${answer.content}</div>
+                        <div class="voting">
+                            <button class="vote-btn"><i class="fas fa-thumbs-up"></i> ${answer.votes_count || 0}</button>
+                            <button class="vote-btn"><i class="fas fa-thumbs-down"></i> 0</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(answerCard);
+                });
+            }
+            
+            // Загружаем вопрос при загрузке страницы
+            if (window.location.search.includes('id=')) {
+                loadQuestionAndAnswers();
+            }
         })();
     </script>
 </body>

@@ -640,6 +640,8 @@
         </div>
     </footer>
 
+    <!-- Подключаем общий модуль авторизации -->
+    <script src="js/auth.js"></script>
     <script>
         // ===== ПОКАЗ/СКРЫТИЕ ПАРОЛЯ (ГЛАЗИКИ) =====
         const togglePassword = document.getElementById('togglePassword');
@@ -694,22 +696,6 @@
         setupIconHandlers(passwordInput, passwordIcon);
         setupIconHandlers(confirmInput, confirmIcon);
 
-        // ===== ОБРАБОТКА ОТПРАВКИ ФОРМЫ (ДЕМО) =====
-        const signupForm = document.getElementById('signupForm');
-        signupForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const policyCheckbox = document.getElementById('policy');
-            if (!policyCheckbox.checked) {
-                alert('Пожалуйста, примите условия использования и политику конфиденциальности.');
-                return;
-            }
-            if (passwordInput.value !== confirmInput.value) {
-                alert('Пароли не совпадают!');
-                return;
-            }
-            alert('Демо-режим: регистрация выполнена!');
-        });
-
         // ===== АНИМАЦИЯ КНОПКИ РЕГИСТРАЦИИ =====
         const signupBtn = document.querySelector('.btn-signup');
         if (signupBtn) {
@@ -735,28 +721,86 @@
             });
         });
 
-        // ===== АНИМАЦИЯ ДЛЯ СОЦИАЛЬНЫХ КНОПОК =====
-        document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (this.getAttribute('href') === '#') {
-                    e.preventDefault();
-                    let service = '';
-                    const icon = this.querySelector('i');
-                    if (icon.classList.contains('fa-google')) service = 'Google';
-                    else if (icon.classList.contains('fa-github')) service = 'GitHub';
-                    else if (icon.classList.contains('fa-telegram')) service = 'Telegram';
-                    else if (icon.classList.contains('fa-vk')) service = 'VK';
-                    alert(`Демо-регистрация через ${service}`);
-                }
-            });
-        });
-
         // Инициализация при загрузке
         window.addEventListener('load', function() {
             if (usernameInput.value.trim() !== '') userIcon.classList.add('active-icon');
             if (emailInput.value.trim() !== '') emailIcon.classList.add('active-icon');
             if (passwordInput.value.trim() !== '') passwordIcon.classList.add('active-icon');
             if (confirmInput.value.trim() !== '') confirmIcon.classList.add('active-icon');
+        });
+
+        // Обработка формы регистрации
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const policyCheckbox = document.getElementById('policy');
+            if (!policyCheckbox.checked) {
+                alert('❌ Ошибка!\n\nПожалуйста, примите условия использования и политику конфиденциальности.');
+                return;
+            }
+
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirm');
+
+            if (passwordInput.value !== confirmInput.value) {
+                alert('❌ Ошибка!\n\nПароли не совпадают!');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Регистрация...';
+
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: passwordInput.value
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Сохраняем токен и данные пользователя
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('auth_user', JSON.stringify(data.user));
+                    
+                    // Проверяем, что данные сохранились
+                    console.log('✅ Регистрация успешна!');
+                    console.log('Token:', data.token.substring(0, 20) + '...');
+                    console.log('User:', data.user);
+
+                    // Показываем уведомление и перенаправляем
+                    alert('✅ Регистрация успешна!\n\nДобро пожаловать, ' + (data.user.username || data.user.email) + '!\n\nСейчас вы будете перенаправлены на главную страницу.');
+                    
+                    // Перенаправляем на главную страницу
+                    setTimeout(() => {
+                        window.location.href = 'feed.html';
+                    }, 1000);
+                } else {
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Зарегистрироваться';
+                    
+                    alert('❌ Ошибка регистрации:\n\n' + (data.error || 'Не удалось зарегистрировать пользователя'));
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                
+                // Восстанавливаем кнопку
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Зарегистрироваться';
+                
+                alert('❌ Ошибка соединения с сервером.\n\nУбедитесь, что сервер запущен на http://localhost:3000');
+            }
         });
     </script>
 </body>

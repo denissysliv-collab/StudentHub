@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub — Профиль пользователя</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Навигация */
+        nav {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: #8b5cf6;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            padding-top: 100px;
+            padding-bottom: 40px;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Вкладки */
+        .profile-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Контент вкладок */
+        .tab-content {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-card {
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .question-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .question-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            border-left: 4px solid;
+        }
+
+        .notification.show {
+            display: flex;
+        }
+
+        .notification.success {
+            border-left-color: #10b981;
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-stats {
+                justify-content: center;
+            }
+
+            .profile-tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav>
+        <div class="container">
+            <div class="nav-content">
+                <a href="feed.html" class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    Student<span>Hub</span>
+                </a>
+                <div class="nav-menu">
+                    <a href="feed.html" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> К ленте
+                    </a>
+                    <button class="btn btn-outline" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Выход
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Заголовок профиля -->
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">A</div>
+                <div class="profile-info">
+                    <h1 class="profile-name" id="profileName">Загрузка...</h1>
+                    <p class="profile-email" id="profileEmail"></p>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="questionsCount">0</div>
+                            <div class="stat-label">Вопросов</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="answersCount">0</div>
+                            <div class="stat-label">Ответов</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="reputation">0</div>
+                            <div class="stat-label">Репутация</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладки -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="questions">Мои вопросы</button>
+                <button class="tab-btn" data-tab="answers">Мои ответы</button>
+                <button class="tab-btn" data-tab="favorites">Избранное</button>
+            </div>
+
+            <!-- Контент вкладок -->
+            <div class="tab-content active" id="questionsTab">
+                <div class="questions-list" id="questionsList">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка вопросов...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="answersTab">
+                <div class="empty-state">
+                    <i class="fas fa-comments"></i>
+                    <p>У вас пока нет ответов</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="favoritesTab">
+                <div class="empty-state">
+                    <i class="fas fa-heart"></i>
+                    <p>У вас пока нет избранных вопросов</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Уведомления -->
+    <div class="notification" id="notification">
+        <span id="notificationIcon"></span>
+        <span id="notificationMessage"></span>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Проверка авторизации
+        function checkAuth() {
+            const user = localStorage.getItem('auth_user');
+            const token = localStorage.getItem('auth_token');
+            
+            if (!user || !token) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            return JSON.parse(user);
+        }
+
+        // Выход с подтверждением
+        function logout() {
+            if (confirm('Вы действительно хотите выйти из аккаунта?')) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+                
+                showNotification('Вы успешно вышли из системы', 'success');
+                
+                // Перенаправление на страницу входа через 1 секунду
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // Отображение профиля
+        function renderProfile(user) {
+            const initial = (user.username || user.email || 'U')[0].toUpperCase();
+            document.getElementById('profileAvatar').textContent = initial;
+            document.getElementById('profileName').textContent = user.username || 'Пользователь';
+            document.getElementById('profileEmail').textContent = user.email || '';
+            document.getElementById('logoutBtn').style.display = 'inline-flex';
+        }
+
+        // Загрузка вопросов пользователя
+        async function loadUserQuestions(userId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/questions?userId=${userId}&limit=10`);
+                const data = await response.json();
+                
+                const questionsList = document.getElementById('questionsList');
+                
+                if (data.data && data.data.length > 0) {
+                    questionsList.innerHTML = data.data.map(q => `
+                        <div class="question-card" onclick="window.location.href='question.html?id=${q.id}'" style="cursor: pointer;">
+                            <h3 class="question-title">${escapeHtml(q.title)}</h3>
+                            <div class="question-meta">
+                                <span><i class="fas fa-calendar"></i> ${formatDate(q.created_at)}</span>
+                                <span><i class="fas fa-comment"></i> ${q.answers_count || 0} ответов</span>
+                                <span><i class="fas fa-eye"></i> ${q.views_count || 0} просмотров</span>
+                                ${q.is_resolved ? '<span style="color: #10b981;"><i class="fas fa-check"></i> Решён</span>' : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('questionsCount').textContent = data.data.length;
+                } else {
+                    questionsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-question-circle"></i>
+                            <p>У вас пока нет вопросов</p>
+                            <a href="ask.html" class="btn btn-primary" style="margin-top: 20px;">
+                                <i class="fas fa-plus"></i> Задать вопрос
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки вопросов:', error);
+                document.getElementById('questionsList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                        <p>Ошибка загрузки вопросов</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Показ уведомления
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const msg = document.getElementById('notificationMessage');
+            
+            notification.className = `notification ${type} show`;
+            icon.innerHTML = type === 'success' ? '<i class="fas fa-check-circle" style="color: #10b981; font-size: 24px;"></i>' : 
+                                                   '<i class="fas fa-exclamation-circle" style="color: #ef4444; font-size: 24px;"></i>';
+            msg.textContent = message;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Переключение вкладок
+        function setupTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            
+            if (user) {
+                renderProfile(user);
+                loadUserQuestions(user.id);
+            }
+            
+            setupTabs();
+            
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+</body>
+</html>

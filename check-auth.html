@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка авторизации</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f9ff, #f5f3ff);
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        h1 { color: #3b82f6; }
+        .status {
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 2px solid #16a34a;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+        button {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59,130,246,0.4);
+        }
+        button.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .nav a {
+            background: white;
+            color: #3b82f6;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Проверка авторизации</h1>
+    
+    <div class="card">
+        <h2>Статус авторизации</h2>
+        <div id="authStatus"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Данные в localStorage</h2>
+        <div id="localStorageData"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Действия</h2>
+        <div class="nav">
+            <a href="feed.html">📰 Лента</a>
+            <a href="ask.html">✍️ Задать вопрос</a>
+            <a href="profile.html">👤 Профиль</a>
+            <a href="login.html">🔑 Войти</a>
+            <a href="registration.html">📝 Регистрация</a>
+        </div>
+        <button onclick="clearAuth()" class="danger">🗑️ Очистить авторизацию</button>
+        <button onclick="checkAuthAgain()">🔄 Проверить снова</button>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            const userStr = localStorage.getItem('auth_user');
+            
+            const statusDiv = document.getElementById('authStatus');
+            const dataDiv = document.getElementById('localStorageData');
+            
+            if (token && userStr) {
+                const user = JSON.parse(userStr);
+                statusDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ Пользователь авторизован!<br><br>
+                        <strong>Username:</strong> ${user.username}<br>
+                        <strong>Email:</strong> ${user.email}<br>
+                        <strong>ID:</strong> ${user.id}<br>
+                        <strong>Role:</strong> ${user.role || 'user'}
+                    </div>
+                `;
+                
+                dataDiv.innerHTML = `
+                    <pre><strong>auth_token:</strong> ${token.substring(0, 50)}...<br><br><strong>auth_user:</strong> ${JSON.stringify(user, null, 2)}</pre>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Пользователь НЕ авторизован!<br><br>
+                        auth_token: ${token ? 'найден' : 'не найден'}<br>
+                        auth_user: ${userStr ? 'найден' : 'не найден'}
+                    </div>
+                `;
+                
+                dataDiv.innerHTML = `
+                    <pre>localStorage пуст или не содержит ключей авторизации</pre>
+                `;
+            }
+        }
+        
+        function clearAuth() {
+            if (confirm('Вы уверены, что хотите очистить данные авторизации?')) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+                alert('Данные авторизации очищены!');
+                checkAuth();
+            }
+        }
+        
+        function checkAuthAgain() {
+            checkAuth();
+            alert('Проверка выполнена! Проверьте консоль браузера (F12) для подробной информации.');
+            console.log('🔍 Проверка авторизации...');
+            console.log('auth_token:', localStorage.getItem('auth_token'));
+            console.log('auth_user:', localStorage.getItem('auth_user'));
+        }
+        
+        // Запускаем проверку при загрузке
+        checkAuth();
+    </script>
+</body>
+</html>
